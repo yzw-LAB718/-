@@ -207,102 +207,102 @@ AIFS / DIFS
 
 ## 6. Rj(dj) 的计算
 
-聚合吞吐公式中的 <img alt="R_j_d_j" src="https://latex.codecogs.com/svg.image?R_j%28d_j%29" /> 表示 STA 到候选接入点 <img alt="j" src="https://latex.codecogs.com/svg.image?j" /> 的 PHY rate。它不是固定常数，而是由 STA 与候选接入点之间的距离、路径损耗、接收信号质量和速率控制共同决定。
+本节只考虑最简单情景：**一个 ONT、一个 AP、一个 STA、无外部干扰**。候选接入点只有：
 
-在理论模型中，可以把计算链条写成：
+<p align="center"><img alt="j in ONT AP only" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20j%5Cin%5C%7B%5Cmathrm%7BONT%7D%2C%5Cmathrm%7BAP%7D%5C%7D" /></p>
 
-<p align="center"><img alt="Rj_calculation_chain" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20d_j%5Crightarrow%20PL_j%28d_j%29%5Crightarrow%20P_%7Br%2Cj%7D%28d_j%29%5Crightarrow%20SNR_j%28d_j%29%5Crightarrow%20MCS_j%28d_j%29%5Crightarrow%20R_j%28d_j%29" /></p>
+聚合吞吐公式中的 <img alt="R_j_d_j" src="https://latex.codecogs.com/svg.image?R_j%28d_j%29" /> 表示 STA 到候选接入点 <img alt="j" src="https://latex.codecogs.com/svg.image?j" /> 的 PHY rate。对这个最小场景，更直接的写法是分别计算：
+
+<p align="center"><img alt="R_ONT_and_R_AP" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20R_%7B%5Cmathrm%7BONT%7D%7D%28d_%7B%5Cmathrm%7BSTA-ONT%7D%7D%29%2C%5Cqquad%20R_%7B%5Cmathrm%7BAP%7D%7D%28d_%7B%5Cmathrm%7BSTA-AP%7D%7D%29" /></p>
+
+其中，<img alt="d_STA_ONT_inline" src="https://latex.codecogs.com/svg.image?d_%7B%5Cmathrm%7BSTA-ONT%7D%7D" /> 表示 STA 到 ONT 的距离，<img alt="d_STA_AP_inline" src="https://latex.codecogs.com/svg.image?d_%7B%5Cmathrm%7BSTA-AP%7D%7D" /> 表示 STA 到 AP 的距离。
 
 ### 6.1 距离计算
 
-对于候选接入点 <img alt="j in ONT AP1 AP2" src="https://latex.codecogs.com/svg.image?j%5Cin%5C%7B%5Cmathrm%7BONT%7D%2C%5Cmathrm%7BAP1%7D%2C%5Cmathrm%7BAP2%7D%5C%7D" />，STA 到节点 <img alt="j" src="https://latex.codecogs.com/svg.image?j" /> 的距离为：
-
-<p align="center"><img alt="distance_general" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20d_j%3D%5Csqrt%7B%28x_%7B%5Cmathrm%7BSTA%7D%7D-x_j%29%5E2%2B%28y_%7B%5Cmathrm%7BSTA%7D%7D-y_j%29%5E2%7D" /></p>
-
-当前代码中的典型节点位置为：
+在当前最小场景中，可以令 ONT 和 AP 的典型位置为：
 
 | 节点 | 典型坐标 |
 |---|---:|
 | ONT | `(0, 0)` |
-| AP1 | `(10, 0)` |
-| AP2 | `(10, 8)` |
-| STA | 扫描脚本通过 `staX`、`staY` 指定 |
+| AP | `(10, 0)` |
+| STA | `(x_STA, y_STA)` |
 
-因此可进一步写成：
+因此，两个候选链路的距离分别为：
 
-<p align="center"><img alt="d_ont" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20d_%7B%5Cmathrm%7BONT%7D%7D%3D%5Csqrt%7Bx_%7B%5Cmathrm%7BSTA%7D%7D%5E2%2By_%7B%5Cmathrm%7BSTA%7D%7D%5E2%7D" /></p>
+<p align="center"><img alt="d_sta_ont" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20d_%7B%5Cmathrm%7BSTA-ONT%7D%7D%3D%5Csqrt%7Bx_%7B%5Cmathrm%7BSTA%7D%7D%5E2%2By_%7B%5Cmathrm%7BSTA%7D%7D%5E2%7D" /></p>
 
-<p align="center"><img alt="d_ap1" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20d_%7B%5Cmathrm%7BAP1%7D%7D%3D%5Csqrt%7B%28x_%7B%5Cmathrm%7BSTA%7D%7D-10%29%5E2%2By_%7B%5Cmathrm%7BSTA%7D%7D%5E2%7D" /></p>
+<p align="center"><img alt="d_sta_ap" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20d_%7B%5Cmathrm%7BSTA-AP%7D%7D%3D%5Csqrt%7B%28x_%7B%5Cmathrm%7BSTA%7D%7D-10%29%5E2%2By_%7B%5Cmathrm%7BSTA%7D%7D%5E2%7D" /></p>
 
-<p align="center"><img alt="d_ap2" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20d_%7B%5Cmathrm%7BAP2%7D%7D%3D%5Csqrt%7B%28x_%7B%5Cmathrm%7BSTA%7D%7D-10%29%5E2%2B%28y_%7B%5Cmathrm%7BSTA%7D%7D-8%29%5E2%7D" /></p>
+如果不想固定 AP 与 ONT 的坐标，也可以保留一般形式：
 
-### 6.2 路径损耗和接收功率
+<p align="center"><img alt="d_sta_ont_general" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20d_%7B%5Cmathrm%7BSTA-ONT%7D%7D%3D%5Csqrt%7B%28x_%7B%5Cmathrm%7BSTA%7D%7D-x_%7B%5Cmathrm%7BONT%7D%7D%29%5E2%2B%28y_%7B%5Cmathrm%7BSTA%7D%7D-y_%7B%5Cmathrm%7BONT%7D%7D%29%5E2%7D" /></p>
 
-仿真中使用 `LogDistancePropagationLossModel`，理论上可写成对数距离路径损耗模型：
+<p align="center"><img alt="d_sta_ap_general" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20d_%7B%5Cmathrm%7BSTA-AP%7D%7D%3D%5Csqrt%7B%28x_%7B%5Cmathrm%7BSTA%7D%7D-x_%7B%5Cmathrm%7BAP%7D%7D%29%5E2%2B%28y_%7B%5Cmathrm%7BSTA%7D%7D-y_%7B%5Cmathrm%7BAP%7D%7D%29%5E2%7D" /></p>
 
-<p align="center"><img alt="path_loss" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20PL_j%28d_j%29%3DPL_0%2B10%5Calpha%5Clog_%7B10%7D%5Cleft%28%5Cfrac%7Bd_j%7D%7Bd_0%7D%5Cright%29" /></p>
+### 6.2 距离到 PHY rate 的计算链条
+
+在无外部干扰条件下，距离通过路径损耗、接收功率和 SNR 间接影响 PHY rate。两条链路可以分别写成：
+
+<p align="center"><img alt="chain_ont" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20d_%7B%5Cmathrm%7BSTA-ONT%7D%7D%5Crightarrow%20PL_%7B%5Cmathrm%7BONT%7D%7D%28d_%7B%5Cmathrm%7BSTA-ONT%7D%7D%29%5Crightarrow%20P_%7Br%2C%5Cmathrm%7BONT%7D%7D%28d_%7B%5Cmathrm%7BSTA-ONT%7D%7D%29%5Crightarrow%20SNR_%7B%5Cmathrm%7BONT%7D%7D%28d_%7B%5Cmathrm%7BSTA-ONT%7D%7D%29%5Crightarrow%20MCS_%7B%5Cmathrm%7BONT%7D%7D%5Crightarrow%20R_%7B%5Cmathrm%7BONT%7D%7D" /></p>
+
+<p align="center"><img alt="chain_ap" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20d_%7B%5Cmathrm%7BSTA-AP%7D%7D%5Crightarrow%20PL_%7B%5Cmathrm%7BAP%7D%7D%28d_%7B%5Cmathrm%7BSTA-AP%7D%7D%29%5Crightarrow%20P_%7Br%2C%5Cmathrm%7BAP%7D%7D%28d_%7B%5Cmathrm%7BSTA-AP%7D%7D%29%5Crightarrow%20SNR_%7B%5Cmathrm%7BAP%7D%7D%28d_%7B%5Cmathrm%7BSTA-AP%7D%7D%29%5Crightarrow%20MCS_%7B%5Cmathrm%7BAP%7D%7D%5Crightarrow%20R_%7B%5Cmathrm%7BAP%7D%7D" /></p>
+
+为了统一记号，也可以令 <img alt="j_in_two" src="https://latex.codecogs.com/svg.image?j%5Cin%5C%7B%5Cmathrm%7BONT%7D%2C%5Cmathrm%7BAP%7D%5C%7D" />，并用 <img alt="d_sta_j" src="https://latex.codecogs.com/svg.image?d_%7B%5Cmathrm%7BSTA-%7Dj%7D" /> 表示 STA 到节点 <img alt="j" src="https://latex.codecogs.com/svg.image?j" /> 的距离。则：
+
+<p align="center"><img alt="path_loss_simple" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20PL_j%28d_%7B%5Cmathrm%7BSTA-%7Dj%7D%29%3DPL_0%2B10%5Calpha%5Clog_%7B10%7D%5Cleft%28%5Cfrac%7Bd_%7B%5Cmathrm%7BSTA-%7Dj%7D%7D%7Bd_0%7D%5Cright%29" /></p>
 
 接收功率为：
 
-<p align="center"><img alt="received_power" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20P_%7Br%2Cj%7D%28d_j%29%3DP_t%2BG_t%2BG_%7Br%2Cj%7D-PL_j%28d_j%29" /></p>
+<p align="center"><img alt="received_power_simple" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20P_%7Br%2Cj%7D%28d_%7B%5Cmathrm%7BSTA-%7Dj%7D%29%3DP_t%2BG_t%2BG_%7Br%2Cj%7D-PL_j%28d_%7B%5Cmathrm%7BSTA-%7Dj%7D%29" /></p>
 
-其中，代码中明确给出的发射功率为：
+无外部干扰时，信噪比为：
 
-<p align="center"><img alt="Pt_20" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20P_t%3D20%5C%20%5Cmathrm%7BdBm%7D" /></p>
+<p align="center"><img alt="snr_simple" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20SNR_j%28d_%7B%5Cmathrm%7BSTA-%7Dj%7D%29%3DP_%7Br%2Cj%7D%28d_%7B%5Cmathrm%7BSTA-%7Dj%7D%29-N_j" /></p>
 
-天线增益、参考损耗、参考距离和路径损耗指数没有在当前代码中单独手动赋值，因此理论分析中可先保留为参数，或者理解为由 ns-3 的默认信道模型内部处理。
+MCS 可以用 SNR 门限建模：
 
-### 6.3 SNR 计算
+<p align="center"><img alt="mcs_threshold_simple" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20MCS_j%28d_%7B%5Cmathrm%7BSTA-%7Dj%7D%29%3D%5Cmax%5Cleft%5C%7Bm%3ASNR_j%28d_%7B%5Cmathrm%7BSTA-%7Dj%7D%29%5Cge%5CGamma_m%5Cright%5C%7D" /></p>
 
-无外部干扰的最小场景下，信噪比可写成：
+最后得到：
 
-<p align="center"><img alt="snr" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20SNR_j%28d_j%29%3DP_%7Br%2Cj%7D%28d_j%29-N_j" /></p>
+<p align="center"><img alt="rate_simple" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20R_j%28d_%7B%5Cmathrm%7BSTA-%7Dj%7D%29%3DR_%7BMCS_j%28d_%7B%5Cmathrm%7BSTA-%7Dj%7D%29%7D%5Cleft%28B_j%2CNSS_j%2CGI_j%5Cright%29" /></p>
 
-噪声功率可近似写为：
+### 6.3 当前代码对应的典型值
 
-<p align="center"><img alt="noise_power" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20N_j%3D-174%2B10%5Clog_%7B10%7D%28B_j%29%2BNF_j%5Cquad%5Cmathrm%7B%28dBm%29%7D" /></p>
+当前最小场景下，<img alt="Rj" src="https://latex.codecogs.com/svg.image?R_j%28d%29" /> 计算相关的典型值可以整理为：
 
-当前代码中信道带宽为：
-
-<p align="center"><img alt="B_160" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20B_j%3D160%5C%20%5Cmathrm%7BMHz%7D" /></p>
-
-若暂不考虑接收机噪声系数，即令 <img alt="NF_zero" src="https://latex.codecogs.com/svg.image?NF_j%3D0" />，则热噪声近似为：
-
-<p align="center"><img alt="thermal_noise_160" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20N_j%5Capprox-174%2B10%5Clog_%7B10%7D%28160%5Ctimes10%5E6%29%5Capprox-92%5C%20%5Cmathrm%7BdBm%7D" /></p>
-
-实际 ns-3 中噪声、误码和解码过程由 PHY 模块内部处理，代码没有把每个测试点的 <img alt="SNR" src="https://latex.codecogs.com/svg.image?SNR" /> 直接输出到 CSV。
-
-### 6.4 MCS 与 PHY rate
-
-理论上，MCS 可用 SNR 门限表示为：
-
-<p align="center"><img alt="mcs_threshold" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20MCS_j%28d_j%29%3D%5Cmax%5Cleft%5C%7Bm%3ASNR_j%28d_j%29%5Cge%5CGamma_m%5Cright%5C%7D" /></p>
-
-然后 PHY rate 为：
-
-<p align="center"><img alt="rate_distance" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20R_j%28d_j%29%3DR_%7BMCS_j%28d_j%29%7D%5Cleft%28B_j%2CNSS_j%2CGI_j%5Cright%29" /></p>
-
-当前代码中与速率计算直接相关的典型取值为：
-
-| 参数 | 代码典型值 | 作用 |
+| 参数 | 代码/理论典型值 | 说明 |
 |---|---:|---|
-| Wi-Fi 标准 | `802.11be` | 决定可用 MCS、前导码和 PHY 结构 |
-| 速率控制器 | `IdealWifiManager` | 根据链路条件自动选择 MCS / PHY rate |
+| 候选接入点 | `ONT`、`AP` | 只考虑一个 ONT 和一个 AP |
+| 外部干扰 | 无 | 当前最小场景不考虑 OBSS 干扰 |
+| ONT 位置 | `(0, 0)` | 典型坐标 |
+| AP 位置 | `(10, 0)` | 典型坐标 |
+| STA 位置 | `(x_STA, y_STA)` | 由测试点决定 |
+| 传播损耗模型 | `LogDistancePropagationLossModel` | 距离通过该模型影响接收功率 |
+| <img alt="P_t" src="https://latex.codecogs.com/svg.image?P_t" /> | `20 dBm` | 发射功率 |
 | <img alt="B_j" src="https://latex.codecogs.com/svg.image?B_j" /> | `160 MHz` | 信道带宽 |
 | <img alt="NSS_j" src="https://latex.codecogs.com/svg.image?NSS_j" /> | `2` | 空间流数 |
 | <img alt="GI_j" src="https://latex.codecogs.com/svg.image?GI_j" /> | `800 ns` | 保护间隔 |
-| <img alt="P_t" src="https://latex.codecogs.com/svg.image?P_t" /> | `20 dBm` | 发射功率 |
-| 传播损耗模型 | `LogDistancePropagationLossModel` | 将距离映射为路径损耗 |
+| Wi-Fi 标准 | `802.11be` | 决定可用 MCS 和 PHY 结构 |
+| 速率控制器 | `IdealWifiManager` | 自动选择 MCS / PHY rate |
+| <img alt="PL0" src="https://latex.codecogs.com/svg.image?PL_0" />、<img alt="alpha" src="https://latex.codecogs.com/svg.image?%5Calpha" />、<img alt="d0" src="https://latex.codecogs.com/svg.image?d_0" /> | 代码未单独手动赋值 | 由 ns-3 信道模型默认参数处理或理论分析中保留 |
+| <img alt="Gamma_m" src="https://latex.codecogs.com/svg.image?%5CGamma_m" /> | 代码未手动列出 | SNR 到 MCS 的门限由 ns-3 速率控制/误码模型隐含处理 |
 
-因此，面向当前仿真的 <img alt="Rj_final" src="https://latex.codecogs.com/svg.image?R_j%28d_j%29" /> 可以概括为：
+噪声功率可以近似写成：
 
-<p align="center"><img alt="Rj_code_mapping" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20R_j%28d_j%29%3DR_%7BMCS_j%28SNR_j%28d_j%29%29%7D%5Cleft%28160%5C%20%5Cmathrm%7BMHz%7D%2C2%2C800%5C%20%5Cmathrm%7Bns%7D%5Cright%29" /></p>
+<p align="center"><img alt="noise_power" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20N_j%3D-174%2B10%5Clog_%7B10%7D%28B_j%29%2BNF_j%5Cquad%5Cmathrm%7B%28dBm%29%7D" /></p>
 
-其中 <img alt="MCS_j" src="https://latex.codecogs.com/svg.image?MCS_j" /> 不需要手动指定，而是由 `IdealWifiManager` 在仿真过程中根据链路条件自动选择。
+当 <img alt="B_160" src="https://latex.codecogs.com/svg.image?B_j%3D160%5C%20%5Cmathrm%7BMHz%7D" /> 且暂不考虑接收机噪声系数时，有：
 
-### 6.5 需要注意的点
+<p align="center"><img alt="noise_160MHz" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20N_j%5Capprox-174%2B10%5Clog_%7B10%7D%28160%5Ctimes10%5E6%29%5Capprox-92%5C%20%5Cmathrm%7BdBm%7D" /></p>
 
-当前代码没有直接输出每个点的 <img alt="SNR_j" src="https://latex.codecogs.com/svg.image?SNR_j" />、<img alt="MCS_j" src="https://latex.codecogs.com/svg.image?MCS_j" /> 和 <img alt="R_j" src="https://latex.codecogs.com/svg.image?R_j" />，最终 CSV 主要输出的是端到端吞吐和各跳吞吐。因此，理论模型中的 <img alt="R_j_d_j" src="https://latex.codecogs.com/svg.image?R_j%28d_j%29" /> 更适合作为中间变量，用来解释“距离改变为什么会导致吞吐改变”。如果后续想精确拟合仿真结果，需要通过 ns-3 trace 额外记录每次发送所选 MCS、PHY rate 和接收端 SNR。
+因此，当前最小场景中的两个 PHY rate 可以概括为：
+
+<p align="center"><img alt="R_ONT_final" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20R_%7B%5Cmathrm%7BONT%7D%7D%28d_%7B%5Cmathrm%7BSTA-ONT%7D%7D%29%3DR_%7BMCS_%7B%5Cmathrm%7BONT%7D%7D%28SNR_%7B%5Cmathrm%7BONT%7D%7D%28d_%7B%5Cmathrm%7BSTA-ONT%7D%7D%29%29%7D%5Cleft%28160%5C%20%5Cmathrm%7BMHz%7D%2C2%2C800%5C%20%5Cmathrm%7Bns%7D%5Cright%29" /></p>
+
+<p align="center"><img alt="R_AP_final" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20R_%7B%5Cmathrm%7BAP%7D%7D%28d_%7B%5Cmathrm%7BSTA-AP%7D%7D%29%3DR_%7BMCS_%7B%5Cmathrm%7BAP%7D%7D%28SNR_%7B%5Cmathrm%7BAP%7D%7D%28d_%7B%5Cmathrm%7BSTA-AP%7D%7D%29%29%7D%5Cleft%28160%5C%20%5Cmathrm%7BMHz%7D%2C2%2C800%5C%20%5Cmathrm%7Bns%7D%5Cright%29" /></p>
+
+需要注意：当前代码没有直接输出每个测试点的 SNR、MCS 和 PHY rate，最终 CSV 主要输出的是端到端吞吐和各跳吞吐。因此，理论模型中的 <img alt="Rj_d" src="https://latex.codecogs.com/svg.image?R_j%28d%29" /> 更适合作为中间变量，用来解释“STA 到 ONT/AP 的距离改变为什么会导致吞吐改变”。如果后续要精确拟合仿真结果，需要通过 ns-3 trace 额外记录每次发送所选 MCS、PHY rate 和接收端 SNR。
 
 ---
 
@@ -310,19 +310,19 @@ AIFS / DIFS
 
 若 STA 直接连接 ONT，则路径吞吐为：
 
-<p align="center"><img alt="path_ont_agg" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20S_%7B%5Cmathrm%7Bpath%7D%2C%5Cmathrm%7BONT%7D%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%3DS_%7B%5Cmathrm%7BSTA%7D%5Cto%5Cmathrm%7BONT%7D%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%28d_%7B%5Cmathrm%7BONT%7D%7D%29" /></p>
+<p align="center"><img alt="path_ont_agg" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20S_%7B%5Cmathrm%7Bpath%7D%2C%5Cmathrm%7BONT%7D%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%3DS_%7B%5Cmathrm%7BSTA%7D%5Cto%5Cmathrm%7BONT%7D%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%28d_%7B%5Cmathrm%7BSTA-ONT%7D%7D%29" /></p>
 
 若 STA 连接 AP，则路径吞吐为：
 
-<p align="center"><img alt="path_ap_agg" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20S_%7B%5Cmathrm%7Bpath%7D%2C%5Cmathrm%7BAP%7D%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%3D%5Cmin%5Cleft%28S_%7B%5Cmathrm%7BSTA%7D%5Cto%5Cmathrm%7BAP%7D%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%28d_%7B%5Cmathrm%7BAP%7D%7D%29%2CC_%7B%5Cmathrm%7Beth%7D%7D%5Cright%29" /></p>
+<p align="center"><img alt="path_ap_agg" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20S_%7B%5Cmathrm%7Bpath%7D%2C%5Cmathrm%7BAP%7D%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%3D%5Cmin%5Cleft%28S_%7B%5Cmathrm%7BSTA%7D%5Cto%5Cmathrm%7BAP%7D%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%28d_%7B%5Cmathrm%7BSTA-AP%7D%7D%29%2CC_%7B%5Cmathrm%7Beth%7D%7D%5Cright%29" /></p>
 
 在当前最小场景中，AP 到 ONT 是有线回传。如果有线回传容量远大于 Wi-Fi 接入链路吞吐，即：
 
-<p align="center"><img alt="backhaul_not_bottleneck" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20C_%7B%5Cmathrm%7Beth%7D%7D%5Cgg%20S_%7B%5Cmathrm%7BSTA%7D%5Cto%5Cmathrm%7BAP%7D%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%28d_%7B%5Cmathrm%7BAP%7D%7D%29" /></p>
+<p align="center"><img alt="backhaul_not_bottleneck" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20C_%7B%5Cmathrm%7Beth%7D%7D%5Cgg%20S_%7B%5Cmathrm%7BSTA%7D%5Cto%5Cmathrm%7BAP%7D%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%28d_%7B%5Cmathrm%7BSTA-AP%7D%7D%29" /></p>
 
 则：
 
-<p align="center"><img alt="path_ap_approx" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20S_%7B%5Cmathrm%7Bpath%7D%2C%5Cmathrm%7BAP%7D%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%5Capprox%20S_%7B%5Cmathrm%7BSTA%7D%5Cto%5Cmathrm%7BAP%7D%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%28d_%7B%5Cmathrm%7BAP%7D%7D%29" /></p>
+<p align="center"><img alt="path_ap_approx" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20S_%7B%5Cmathrm%7Bpath%7D%2C%5Cmathrm%7BAP%7D%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%5Capprox%20S_%7B%5Cmathrm%7BSTA%7D%5Cto%5Cmathrm%7BAP%7D%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%28d_%7B%5Cmathrm%7BSTA-AP%7D%7D%29" /></p>
 
 因此，最小场景下的接入点选择为：
 
