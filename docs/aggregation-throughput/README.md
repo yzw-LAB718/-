@@ -205,13 +205,40 @@ AIFS / DIFS
 
 ---
 
-## 6. 距离、SNR、MCS 与 PHY rate
+## 6. Rj(dj) 的计算
 
-聚合模型中的 <img alt="R_j_d_j" src="https://latex.codecogs.com/svg.image?R_j%28d_j%29" /> 仍然由距离间接决定。完整链条为：
+聚合吞吐公式中的 <img alt="R_j_d_j" src="https://latex.codecogs.com/svg.image?R_j%28d_j%29" /> 表示 STA 到候选接入点 <img alt="j" src="https://latex.codecogs.com/svg.image?j" /> 的 PHY rate。它不是固定常数，而是由 STA 与候选接入点之间的距离、路径损耗、接收信号质量和速率控制共同决定。
 
-<p align="center"><img alt="distance_chain" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20d_j%5Crightarrow%20PL_j%28d_j%29%5Crightarrow%20P_%7Br%2Cj%7D%28d_j%29%5Crightarrow%20SNR_j%28d_j%29%5Crightarrow%20MCS_j%28d_j%29%5Crightarrow%20R_j%28d_j%29" /></p>
+在理论模型中，可以把计算链条写成：
 
-采用对数距离路径损耗模型：
+<p align="center"><img alt="Rj_calculation_chain" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20d_j%5Crightarrow%20PL_j%28d_j%29%5Crightarrow%20P_%7Br%2Cj%7D%28d_j%29%5Crightarrow%20SNR_j%28d_j%29%5Crightarrow%20MCS_j%28d_j%29%5Crightarrow%20R_j%28d_j%29" /></p>
+
+### 6.1 距离计算
+
+对于候选接入点 <img alt="j in ONT AP1 AP2" src="https://latex.codecogs.com/svg.image?j%5Cin%5C%7B%5Cmathrm%7BONT%7D%2C%5Cmathrm%7BAP1%7D%2C%5Cmathrm%7BAP2%7D%5C%7D" />，STA 到节点 <img alt="j" src="https://latex.codecogs.com/svg.image?j" /> 的距离为：
+
+<p align="center"><img alt="distance_general" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20d_j%3D%5Csqrt%7B%28x_%7B%5Cmathrm%7BSTA%7D%7D-x_j%29%5E2%2B%28y_%7B%5Cmathrm%7BSTA%7D%7D-y_j%29%5E2%7D" /></p>
+
+当前代码中的典型节点位置为：
+
+| 节点 | 典型坐标 |
+|---|---:|
+| ONT | `(0, 0)` |
+| AP1 | `(10, 0)` |
+| AP2 | `(10, 8)` |
+| STA | 扫描脚本通过 `staX`、`staY` 指定 |
+
+因此可进一步写成：
+
+<p align="center"><img alt="d_ont" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20d_%7B%5Cmathrm%7BONT%7D%7D%3D%5Csqrt%7Bx_%7B%5Cmathrm%7BSTA%7D%7D%5E2%2By_%7B%5Cmathrm%7BSTA%7D%7D%5E2%7D" /></p>
+
+<p align="center"><img alt="d_ap1" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20d_%7B%5Cmathrm%7BAP1%7D%7D%3D%5Csqrt%7B%28x_%7B%5Cmathrm%7BSTA%7D%7D-10%29%5E2%2By_%7B%5Cmathrm%7BSTA%7D%7D%5E2%7D" /></p>
+
+<p align="center"><img alt="d_ap2" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20d_%7B%5Cmathrm%7BAP2%7D%7D%3D%5Csqrt%7B%28x_%7B%5Cmathrm%7BSTA%7D%7D-10%29%5E2%2B%28y_%7B%5Cmathrm%7BSTA%7D%7D-8%29%5E2%7D" /></p>
+
+### 6.2 路径损耗和接收功率
+
+仿真中使用 `LogDistancePropagationLossModel`，理论上可写成对数距离路径损耗模型：
 
 <p align="center"><img alt="path_loss" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20PL_j%28d_j%29%3DPL_0%2B10%5Calpha%5Clog_%7B10%7D%5Cleft%28%5Cfrac%7Bd_j%7D%7Bd_0%7D%5Cright%29" /></p>
 
@@ -219,19 +246,63 @@ AIFS / DIFS
 
 <p align="center"><img alt="received_power" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20P_%7Br%2Cj%7D%28d_j%29%3DP_t%2BG_t%2BG_%7Br%2Cj%7D-PL_j%28d_j%29" /></p>
 
-无干扰情况下，信噪比为：
+其中，代码中明确给出的发射功率为：
+
+<p align="center"><img alt="Pt_20" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20P_t%3D20%5C%20%5Cmathrm%7BdBm%7D" /></p>
+
+天线增益、参考损耗、参考距离和路径损耗指数没有在当前代码中单独手动赋值，因此理论分析中可先保留为参数，或者理解为由 ns-3 的默认信道模型内部处理。
+
+### 6.3 SNR 计算
+
+无外部干扰的最小场景下，信噪比可写成：
 
 <p align="center"><img alt="snr" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20SNR_j%28d_j%29%3DP_%7Br%2Cj%7D%28d_j%29-N_j" /></p>
 
-MCS 可以建模为 SNR 门限决定的阶梯函数：
+噪声功率可近似写为：
+
+<p align="center"><img alt="noise_power" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20N_j%3D-174%2B10%5Clog_%7B10%7D%28B_j%29%2BNF_j%5Cquad%5Cmathrm%7B%28dBm%29%7D" /></p>
+
+当前代码中信道带宽为：
+
+<p align="center"><img alt="B_160" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20B_j%3D160%5C%20%5Cmathrm%7BMHz%7D" /></p>
+
+若暂不考虑接收机噪声系数，即令 <img alt="NF_zero" src="https://latex.codecogs.com/svg.image?NF_j%3D0" />，则热噪声近似为：
+
+<p align="center"><img alt="thermal_noise_160" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20N_j%5Capprox-174%2B10%5Clog_%7B10%7D%28160%5Ctimes10%5E6%29%5Capprox-92%5C%20%5Cmathrm%7BdBm%7D" /></p>
+
+实际 ns-3 中噪声、误码和解码过程由 PHY 模块内部处理，代码没有把每个测试点的 <img alt="SNR" src="https://latex.codecogs.com/svg.image?SNR" /> 直接输出到 CSV。
+
+### 6.4 MCS 与 PHY rate
+
+理论上，MCS 可用 SNR 门限表示为：
 
 <p align="center"><img alt="mcs_threshold" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20MCS_j%28d_j%29%3D%5Cmax%5Cleft%5C%7Bm%3ASNR_j%28d_j%29%5Cge%5CGamma_m%5Cright%5C%7D" /></p>
 
-于是 PHY rate 为：
+然后 PHY rate 为：
 
 <p align="center"><img alt="rate_distance" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20R_j%28d_j%29%3DR_%7BMCS_j%28d_j%29%7D%5Cleft%28B_j%2CNSS_j%2CGI_j%5Cright%29" /></p>
 
-因此，距离不会直接出现在吞吐公式的数据发送项中，而是通过影响 SNR、MCS 和 PHY rate 间接影响吞吐。
+当前代码中与速率计算直接相关的典型取值为：
+
+| 参数 | 代码典型值 | 作用 |
+|---|---:|---|
+| Wi-Fi 标准 | `802.11be` | 决定可用 MCS、前导码和 PHY 结构 |
+| 速率控制器 | `IdealWifiManager` | 根据链路条件自动选择 MCS / PHY rate |
+| <img alt="B_j" src="https://latex.codecogs.com/svg.image?B_j" /> | `160 MHz` | 信道带宽 |
+| <img alt="NSS_j" src="https://latex.codecogs.com/svg.image?NSS_j" /> | `2` | 空间流数 |
+| <img alt="GI_j" src="https://latex.codecogs.com/svg.image?GI_j" /> | `800 ns` | 保护间隔 |
+| <img alt="P_t" src="https://latex.codecogs.com/svg.image?P_t" /> | `20 dBm` | 发射功率 |
+| 传播损耗模型 | `LogDistancePropagationLossModel` | 将距离映射为路径损耗 |
+
+因此，面向当前仿真的 <img alt="Rj_final" src="https://latex.codecogs.com/svg.image?R_j%28d_j%29" /> 可以概括为：
+
+<p align="center"><img alt="Rj_code_mapping" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20R_j%28d_j%29%3DR_%7BMCS_j%28SNR_j%28d_j%29%29%7D%5Cleft%28160%5C%20%5Cmathrm%7BMHz%7D%2C2%2C800%5C%20%5Cmathrm%7Bns%7D%5Cright%29" /></p>
+
+其中 <img alt="MCS_j" src="https://latex.codecogs.com/svg.image?MCS_j" /> 不需要手动指定，而是由 `IdealWifiManager` 在仿真过程中根据链路条件自动选择。
+
+### 6.5 需要注意的点
+
+当前代码没有直接输出每个点的 <img alt="SNR_j" src="https://latex.codecogs.com/svg.image?SNR_j" />、<img alt="MCS_j" src="https://latex.codecogs.com/svg.image?MCS_j" /> 和 <img alt="R_j" src="https://latex.codecogs.com/svg.image?R_j" />，最终 CSV 主要输出的是端到端吞吐和各跳吞吐。因此，理论模型中的 <img alt="R_j_d_j" src="https://latex.codecogs.com/svg.image?R_j%28d_j%29" /> 更适合作为中间变量，用来解释“距离改变为什么会导致吞吐改变”。如果后续想精确拟合仿真结果，需要通过 ns-3 trace 额外记录每次发送所选 MCS、PHY rate 和接收端 SNR。
 
 ---
 
