@@ -56,9 +56,11 @@ AIFS / DIFS
 
 <p align="center"><img alt="aggregate process" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20%5Cmathrm%7BAIFS%7D%5Crightarrow%5Cmathrm%7BBackoff%7D%5Crightarrow%5Cmathrm%7BPHY%5C%20Preamble%7D%5Crightarrow%5Cmathrm%7BAggregated%5C%20Data%7D%5Crightarrow%5Cmathrm%7BSIFS%7D%5Crightarrow%5Cmathrm%7BBlock%5C%20ACK%7D" /></p>
 
-一次成功聚合传输时间为：
+不显式考虑传播时延时，一次成功聚合传输时间为：
 
 <p align="center"><img alt="Tsucc agg" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20T_%7B%5Cmathrm%7Bsucc%7D%2Cj%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%3DT_%7B%5Cmathrm%7BAIFS%7D%7D%2BE%5BT_%7B%5Cmathrm%7Bbo%7D%7D%5D%2BT_%7B%5Cmathrm%7BPHY%7D%2Cj%7D%2B%5Cfrac%7BL_%7B%5Cmathrm%7BPSDU%7D%2Cj%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%7D%7BR_j%28d_j%29%7D%2BT_%7B%5Cmathrm%7BSIFS%7D%7D%2BT_%7B%5Cmathrm%7BBA%7D%7D" /></p>
+
+如果后续考虑级联场景，建议使用第 8 章中的时延增强形式，把无线传播时延和有线回传时延显式加入路径时延模型。
 
 其中：
 
@@ -106,7 +108,7 @@ AIFS / DIFS
 
 <p align="center"><img alt="S agg byte" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20S_j%5E%7B%5Cmathrm%7Bagg%7D%7D%28d_j%29%3D%5Cfrac%7B8N_%7B%5Cmathrm%7BMPDU%7D%2Cj%7DN_%7B%5Cmathrm%7BMSDU%7D%2Cj%7DL_%7B%5Cmathrm%7BMSDU%7D%7D%7D%7BT_%7B%5Cmathrm%7BAIFS%7D%7D%2B%5Cfrac%7BCW_%7B%5Cmin%7D%7D%7B2%7D%5Csigma%2BT_%7B%5Cmathrm%7BPHY%7D%2Cj%7D%2B%5Cfrac%7B8%5Cleft%28N_%7B%5Cmathrm%7BMPDU%7D%2Cj%7DN_%7B%5Cmathrm%7BMSDU%7D%2Cj%7DL_%7B%5Cmathrm%7BMSDU%7D%7D%2BL_%7B%5Cmathrm%7Boh%7D%2Cj%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%5Cright%29%7D%7BR_j%28d_j%29%7D%2BT_%7B%5Cmathrm%7BSIFS%7D%7D%2BT_%7B%5Cmathrm%7BBA%7D%7D%7D" /></p>
 
-这个式子描述的是无线链路的聚合服务能力。实际测得吞吐还可能受到有线回传和应用层供给限制，因此后文会再加路径瓶颈和应用层供给两层。
+这个式子描述的是无线链路的聚合服务能力。实际测得吞吐还可能受到有线回传、应用层供给和级联时延限制，因此后文会再加路径瓶颈、应用层供给和时延增强模型。
 
 ---
 
@@ -121,7 +123,7 @@ AIFS / DIFS
 | 接入选择 | 候选接入点 | `ONT`、`AP` | STA 二选一接入 |
 | 回传 | AP-ONT | 有线 | AP 通过 ONT 连接外部网络 |
 | 回传速率 | <img alt="C_eth" src="https://latex.codecogs.com/svg.image?C_%7B%5Cmathrm%7Beth%7D" /> | `10 Gbps` | 通常不是瓶颈 |
-| 回传时延 | <img alt="tau_eth" src="https://latex.codecogs.com/svg.image?%5Ctau_%7B%5Cmathrm%7Beth%7D" /> | `500 ns` | 吞吐主公式中可忽略 |
+| 回传时延 | <img alt="tau_eth" src="https://latex.codecogs.com/svg.image?%5Ctau_%7B%5Cmathrm%7Beth%7D" /> | `500 ns` | 单跳影响很小，级联时建议保留 |
 | 外部干扰 | OBSS | 关闭 | 最小理论场景 |
 | 无线标准 | `WifiStandard` | `802.11be` | 代码配置 |
 | 频段 | band | `5 GHz` | `BAND_5GHZ` |
@@ -132,7 +134,7 @@ AIFS / DIFS
 | 速率控制 | `RemoteStationManager` | `IdealWifiManager` | 自动选择 MCS / PHY rate |
 | 发射功率 | <img alt="P_t" src="https://latex.codecogs.com/svg.image?P_t" /> | `20 dBm` | 进入接收功率计算 |
 | 路损模型 | Loss Model | `LogDistancePropagationLossModel` | 距离影响 SNR |
-| 传播时延 | Delay Model | `ConstantSpeedPropagationDelayModel` | 米级场景下传播时延很小 |
+| 传播时延 | Delay Model | `ConstantSpeedPropagationDelayModel` | 单跳很小，级联时可累积 |
 | RTS/CTS | `RtsCtsThreshold` | `999999` | 基本不触发 RTS/CTS |
 | A-MPDU | `BE_MaxAmpduSize` | `15523200 B` | 聚合上限，不代表每次都发满 |
 | A-MSDU | `BE_MaxAmsduSize` | `11398 B` | 聚合上限 |
@@ -300,17 +302,81 @@ MCS 可用 SNR 门限建模：
 
 ---
 
-## 8. 传播时延是否需要进入吞吐公式
+## 8. 传播时延与级联场景
 
-代码中无线信道采用 `ConstantSpeedPropagationDelayModel`，有线 AP-ONT 链路设置了 `500 ns` 时延。严格写法可以在无线成功传输时间中加入传播时延：
+### 8.1 单跳最小场景中的时延
 
-<p align="center"><img alt="Tsucc delay" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20T_%7B%5Cmathrm%7Bsucc%7D%2Cj%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%3DT_%7B%5Cmathrm%7BAIFS%7D%7D%2BE%5BT_%7B%5Cmathrm%7Bbo%7D%7D%5D%2BT_%7B%5Cmathrm%7BPHY%7D%2Cj%7D%2B%5Cfrac%7BL_%7B%5Cmathrm%7BPSDU%7D%2Cj%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%7D%7BR_j%28d_j%29%7D%2BT_%7B%5Cmathrm%7BSIFS%7D%7D%2BT_%7B%5Cmathrm%7BBA%7D%7D%2B2%5Ctau_%7B%5Cmathrm%7Bwifi%7D%2Cj%7D" /></p>
+代码中无线信道采用 `ConstantSpeedPropagationDelayModel`，有线 AP-ONT 链路设置了 `500 ns` 时延。对单跳最小场景而言，无线传播时延和有线回传时延都很小，但为了后续扩展到级联场景，建议保留时延项。
 
-其中：
+无线传播时延可写为：
 
 <p align="center"><img alt="tau wifi" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20%5Ctau_%7B%5Cmathrm%7Bwifi%7D%2Cj%7D%3D%5Cfrac%7Bd_%7B%5Cmathrm%7BSTA-%7Dj%7D%7D%7Bc%7D" /></p>
 
-但是在室内米级 Wi-Fi 场景中，无线传播时延通常只有几十 ns；有线 `500 ns` 也只有 `0.5 μs`。它们远小于 AIFS、随机退避、SIFS 等微秒级 MAC 开销。因此，在吞吐主公式中可以忽略传播时延；如果研究端到端 delay 或 TCP RTT，再单独保留这些时延项。
+其中 <img alt="c" src="https://latex.codecogs.com/svg.image?c" /> 为电磁波传播速度，近似取 <img alt="c value" src="https://latex.codecogs.com/svg.image?3%5Ctimes10%5E8%5C%20%5Cmathrm%7Bm%2Fs%7D" />。
+
+严格写法可以在无线成功聚合传输时间中加入 DATA 和 Block ACK 的往返传播时延：
+
+<p align="center"><img alt="Tsucc delay" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20T_%7B%5Cmathrm%7Bsucc%7D%2Cj%7D%5E%7B%5Cmathrm%7Bagg%2Cdelay%7D%7D%3DT_%7B%5Cmathrm%7BAIFS%7D%7D%2BE%5BT_%7B%5Cmathrm%7Bbo%7D%7D%5D%2BT_%7B%5Cmathrm%7BPHY%7D%2Cj%7D%2B%5Cfrac%7BL_%7B%5Cmathrm%7BPSDU%7D%2Cj%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%7D%7BR_j%28d_j%29%7D%2BT_%7B%5Cmathrm%7BSIFS%7D%7D%2BT_%7B%5Cmathrm%7BBA%7D%7D%2B2%5Ctau_%7B%5Cmathrm%7Bwifi%7D%2Cj%7D" /></p>
+
+当前米级 Wi-Fi 场景中，例如距离为 `10 m` 时，单程无线传播时延约为 `33 ns`，往返约 `66 ns`，远小于 AIFS、随机退避、SIFS 等微秒级开销。因此在单跳吞吐主公式中可以忽略；但在级联跳数较多时，多个有线 / 无线传播时延会累积，需要在端到端时延模型中保留。
+
+### 8.2 AP 路径中的有线时延
+
+对于最小 AP 接入路径：
+
+```text
+ONT → AP → STA
+```
+
+除了 AP 到 STA 的无线服务时间，还存在 ONT 到 AP 的有线传输与传播时延。可以写成：
+
+<p align="center"><img alt="D AP path" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20D_%7B%5Cmathrm%7Bpath%2CAP%7D%7D%3D%5Cfrac%7BL_%7B%5Cmathrm%7Bpayload%7D%7D%7D%7BC_%7B%5Cmathrm%7Beth%7D%7D%2B%5Ctau_%7B%5Cmathrm%7Beth%7D%7D%2BT_%7B%5Cmathrm%7Bsucc%2CAP%7D%7D%5E%7B%5Cmathrm%7Bagg%2Cdelay%7D%7D" /></p>
+
+其中当前代码典型值为：
+
+<p align="center"><img alt="eth values" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20C_%7B%5Cmathrm%7Beth%7D%7D%3D10%5C%20%5Cmathrm%7BGbps%7D%2C%5Cqquad%20%5Ctau_%7B%5Cmathrm%7Beth%7D%7D%3D500%5C%20%5Cmathrm%7Bns%7D" /></p>
+
+如果采用保守的“端到端服务时间”模型，则 AP 路径的时延增强吞吐可写成：
+
+<p align="center"><img alt="S AP delay" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20S_%7B%5Cmathrm%7Bpath%2CAP%7D%7D%5E%7B%5Cmathrm%7Bdelay%7D%7D%3D%5Cfrac%7BL_%7B%5Cmathrm%7Bpayload%7D%7D%7D%7BD_%7B%5Cmathrm%7Bpath%2CAP%7D%7D%7D" /></p>
+
+不过需要注意：对于连续 TCP 流，网络通常存在流水线传输，稳态吞吐更接近瓶颈链路容量；固定传播时延主要影响端到端 delay 和 TCP RTT，而不一定直接按上述端到端服务时间线性降低稳态吞吐。
+
+### 8.3 级联场景的一般写法
+
+若后续考虑多级 AP 级联，路径中可能包含多个无线跳和多个有线跳。设路径中有 <img alt="H" src="https://latex.codecogs.com/svg.image?H" /> 个无线跳、<img alt="K" src="https://latex.codecogs.com/svg.image?K" /> 个有线跳，则端到端时延可以写成：
+
+<p align="center"><img alt="D cascade" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20D_%7B%5Cmathrm%7BE2E%7D%7D%3D%5Csum_%7Bh%3D1%7D%5EH%20T_%7B%5Cmathrm%7Bsucc%7D%2Ch%7D%5E%7B%5Cmathrm%7Bagg%2Cdelay%7D%7D%2B%5Csum_%7Bk%3D1%7D%5EK%5Cleft%28%5Cfrac%7BL_%7B%5Cmathrm%7Bpayload%7D%7D%7D%7BC_%7B%5Cmathrm%7Beth%2Ck%7D%7D%2B%5Ctau_%7B%5Cmathrm%7Beth%2Ck%7D%7D%5Cright%29" /></p>
+
+对应的保守服务时间吞吐为：
+
+<p align="center"><img alt="S cascade service" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20S_%7B%5Cmathrm%7BE2E%7D%7D%5E%7B%5Cmathrm%7Bservice%7D%7D%3D%5Cfrac%7BL_%7B%5Cmathrm%7Bpayload%7D%7D%7D%7BD_%7B%5Cmathrm%7BE2E%7D%7D%7D" /></p>
+
+如果采用稳态流水线视角，则端到端吞吐更接近路径中各跳容量的最小值：
+
+<p align="center"><img alt="S cascade bottleneck" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20S_%7B%5Cmathrm%7BE2E%7D%7D%5E%7B%5Cmathrm%7Bbottleneck%7D%7D%3D%5Cmin%5Cleft%28%5Cmin_%7Bh%7D%20S_%7B%5Cmathrm%7Bwireless%7D%2Ch%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%2C%5Cmin_%7Bk%7D%20C_%7B%5Cmathrm%7Beth%2Ck%7D%7D%5Cright%29" /></p>
+
+两种写法的区别是：
+
+```text
+保守服务时间模型：强调每个数据单元端到端经过所有跳的总耗时；
+稳态瓶颈模型：强调连续流量流水线传输时由最慢链路决定吞吐。
+```
+
+在 TCP 场景中，级联时延还会增大 RTT。若 TCP 发送/接收窗口有限，吞吐还可能受到窗口限制：
+
+<p align="center"><img alt="tcp window limit" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20S_%7B%5Cmathrm%7BTCP%7D%7D%5Cle%5Cfrac%7BW_%7B%5Cmathrm%7BTCP%7D%7D%7D%7BRTT%7D" /></p>
+
+因此，后续做级联分析时，建议同时保留：
+
+```text
+1. 每跳无线聚合服务时间；
+2. 每段有线容量和有线时延；
+3. 端到端 RTT / TCP 窗口限制；
+4. 稳态瓶颈链路容量。
+```
+
+这样既能解释单跳场景下“时延影响很小”，也能扩展到级联场景下“跳数越多，端到端 delay 和 TCP RTT 越明显”的情况。
 
 ---
 
@@ -356,8 +422,10 @@ C++ 默认可以关闭 OBSS，但 Python 扫描脚本的默认参数会开启 OB
 当前最小场景可以按三层理解：
 
 1. **无线聚合服务能力**：由 AIFS、退避、PHY 前导码、聚合帧发送时间、SIFS 和 Block ACK 决定；
-2. **路径瓶颈**：AP 路径需要考虑 AP-ONT 有线回传容量，但当前 `10 Gbps` 通常不是瓶颈；
+2. **路径瓶颈**：AP 路径需要考虑 AP-ONT 有线回传容量，当前 `10 Gbps` 通常不是瓶颈；
 3. **应用层供给**：批量脚本实际供给约 `20 Gbps`，通常足以把 Wi-Fi 链路打满，因此可近似看作饱和发送。
+
+如果只分析单跳最小场景，传播时延对吞吐影响很小；如果后续分析多级 AP 级联，则应该保留无线传播时延、有线链路时延和 TCP RTT / 窗口限制，因为这些因素会随跳数增加而累积。
 
 因此，接入选择的核心仍然是比较两条无线链路：
 
