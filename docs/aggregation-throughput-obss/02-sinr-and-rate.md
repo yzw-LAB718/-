@@ -145,6 +145,15 @@ d_{\mathrm{OBSSAP-STA}}
 \end{aligned}
 $$
 
+为了避免距离过小导致对数路损异常，同样使用有效距离：
+
+$$
+\begin{aligned}
+d_{\mathrm{OBSS,eff}}
+&=\max(d_{\mathrm{OBSSAP-STA}},1\ \mathrm{m}).
+\end{aligned}
+$$
+
 OBSS AP 在目标 STA 处产生的干扰功率为：
 
 $$
@@ -165,6 +174,45 @@ $$
 $$
 I_{\mathrm{OBSS}}\approx20-PL(d_{\mathrm{OBSSAP-STA}}).
 $$
+
+将对数距离路径损耗代入，得到：
+
+$$
+\begin{aligned}
+I_{\mathrm{OBSS}}
+&\approx20-\left[46.6777+30\log_{10}(d_{\mathrm{OBSS,eff}})\right]
+\\
+&=-26.6777-30\log_{10}(d_{\mathrm{OBSS,eff}}).
+\end{aligned}
+$$
+
+再代入 OBSS AP 坐标 $(4,4,0)$，可写成关于 STA 坐标的形式：
+
+$$
+\begin{aligned}
+I_{\mathrm{OBSS}}(x_{\mathrm{STA}},y_{\mathrm{STA}})
+&\approx -26.6777
+-30\log_{10}\left(
+\max\left(
+\sqrt{(x_{\mathrm{STA}}-4)^2+(y_{\mathrm{STA}}-4)^2},1
+\right)
+\right).
+\end{aligned}
+$$
+
+如果目标 STA 与 OBSS AP 的距离不小于 $1\ \mathrm{m}$，则可以进一步简化为：
+
+$$
+\begin{aligned}
+I_{\mathrm{OBSS}}(x_{\mathrm{STA}},y_{\mathrm{STA}})
+&\approx -26.6777
+-30\log_{10}\left(
+\sqrt{(x_{\mathrm{STA}}-4)^2+(y_{\mathrm{STA}}-4)^2}
+\right).
+\end{aligned}
+$$
+
+单位为 dBm。
 
 ---
 
