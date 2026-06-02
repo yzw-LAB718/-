@@ -312,46 +312,136 @@ $$
 L_{\mathrm{MSDU}}=1500\ \mathrm{B}
 $$
 
-若一次 A-MPDU 中有 $N_{\mathrm{MPDU}}$ 个 MPDU，每个 MPDU 内通过 A-MSDU 聚合 $N_{\mathrm{MSDU}}$ 个 MSDU，则有效数据长度为：
+一次 A-MPDU 中真正承载的有效数据量为：
 
 $$
-L_{\mathrm{payload}}^{\mathrm{agg}}=N_{\mathrm{MPDU}}N_{\mathrm{MSDU}}L_{\mathrm{MSDU}}
+L_{\mathrm{payload},j}^{\mathrm{agg}}=N_{\mathrm{MPDU},j}N_{\mathrm{MSDU},j}L_{\mathrm{MSDU}}
 $$
 
-当前 A-MSDU 上限为 $11398\ \mathrm{B}$。若考虑每个 A-MSDU 子帧头约 $14\ \mathrm{B}$，并按 4 字节对齐，则一个 $1500\ \mathrm{B}$ MSDU 对应子帧长度近似为：
+其中 $N_{\mathrm{MSDU},j}$ 是每个 MPDU 内通过 A-MSDU 聚合的 MSDU 个数，$N_{\mathrm{MPDU},j}$ 是一次 A-MPDU 中聚合的 MPDU 个数。
+
+### 6.1 每个 MPDU 中的 MSDU 个数
+
+当前 A-MSDU 上限为：
 
 $$
-L_{\mathrm{sub}}=14+1500+2=1516\ \mathrm{B}
+BE_{\mathrm{MaxAmsduSize}}=11398\ \mathrm{B}
 $$
 
-因此每个 A-MSDU 中最多约可放：
+A-MSDU 子帧头近似取 $14\ \mathrm{B}$，并按 4 字节对齐。单个 MSDU 子帧长度为：
 
 $$
-N_{\mathrm{MSDU}}\approx\left\lfloor\frac{11398}{1516}\right\rfloor=7
+L_{\mathrm{sub}}=14+L_{\mathrm{MSDU}}+p
 $$
 
-于是：
+其中 padding 为：
 
 $$
-L_{\mathrm{payload}}^{\mathrm{agg}}\approx10500N_{\mathrm{MPDU}}\ \mathrm{B}
+p=\left(4-[(14+L_{\mathrm{MSDU}})\bmod4]\right)\bmod4
 $$
+
+代入 $L_{\mathrm{MSDU}}=1500\ \mathrm{B}$：
+
+$$
+14+1500=1514
+$$
+
+$$
+1514\bmod4=2
+$$
+
+$$
+p=2\ \mathrm{B}
+$$
+
+因此：
+
+$$
+L_{\mathrm{sub}}=1516\ \mathrm{B}
+$$
+
+于是每个 A-MSDU 中最多可放：
+
+$$
+N_{\mathrm{MSDU},j}=\left\lfloor\frac{11398}{1516}\right\rfloor=7
+$$
+
+所以当前理论模型里可以近似取：
+
+$$
+N_{\mathrm{MSDU},j}=7
+$$
+
+### 6.2 有效负载长度
+
+代入 $N_{\mathrm{MSDU},j}=7$ 和 $L_{\mathrm{MSDU}}=1500\ \mathrm{B}$，得到：
+
+$$
+L_{\mathrm{payload},j}^{\mathrm{agg}}=N_{\mathrm{MPDU},j}\times7\times1500
+$$
+
+即：
+
+$$
+L_{\mathrm{payload},j}^{\mathrm{agg}}=10500N_{\mathrm{MPDU},j}\ \mathrm{B}
+$$
+
+如果临时按普通 Block ACK 窗口上限 $64$ 个 MPDU 建模，则：
+
+$$
+L_{\mathrm{payload},j}^{\mathrm{agg}}=10500\times64=672000\ \mathrm{B}
+$$
+
+也就是：
+
+$$
+8L_{\mathrm{payload},j}^{\mathrm{agg}}=5.376\times10^6\ \mathrm{bit}
+$$
+
+### 6.3 $N_{\mathrm{MPDU},j}$ 不应直接固定为最大字节上限
+
+仅从 A-MPDU 最大字节数出发，可以先得到一个字节上限对应的 MPDU 个数：
+
+$$
+N_{\mathrm{size},j}=\left\lfloor\frac{BE_{\mathrm{MaxAmpduSize}}}{L_{\mathrm{AMPDU,sub},j}}\right\rfloor
+$$
+
+但 ns-3 实际每次聚合的 $N_{\mathrm{MPDU},j}$ 不是固定常数，而是 MAC 聚合器动态决定的。更合理的抽象是：
+
+$$
+N_{\mathrm{MPDU},j}=\min\{N_{\mathrm{queue},j},N_{\mathrm{BA},j},N_{\mathrm{TXOP},j},N_{\mathrm{size},j},N_{\mathrm{retry},j}\}
+$$
+
+其中：
+
+| 符号 | 含义 |
+|---|---|
+| $N_{\mathrm{queue},j}$ | 当前 MAC 队列中可用于聚合的 MPDU 数量 |
+| $N_{\mathrm{BA},j}$ | Block ACK 窗口允许的 MPDU 数量 |
+| $N_{\mathrm{TXOP},j}$ | 一次 TXOP 时间限制下允许发送的 MPDU 数量 |
+| $N_{\mathrm{size},j}$ | A-MPDU 最大字节数限制允许的 MPDU 数量 |
+| $N_{\mathrm{retry},j}$ | 重传状态、同一 TID 聚合规则等带来的限制 |
+
+因此，理论模型中建议保留 $N_{\mathrm{MPDU},j}$ 作为变量，或使用一个合理上界做简化分析，而不要直接把它固定为由 `BE_MaxAmpduSize` 算出的最大值。
 
 ---
 
 ## 7. 聚合后 PSDU 总长度
 
-每个 A-MSDU 子帧长度近似为：
+空口真正发送的不是纯有效负载，而是包含 MAC 头、FCS、A-MPDU delimiter、A-MSDU 子帧头和 padding 的 PSDU 总长度。
+
+### 7.1 单个 MPDU 长度
+
+每个 MPDU 内部的 A-MSDU 长度为：
 
 $$
-L_{\mathrm{sub},i}=14+L_{\mathrm{MSDU},i}+p_i
+L_{\mathrm{AMSDU},j}=N_{\mathrm{MSDU},j}L_{\mathrm{sub}}
 $$
 
-其中 $p_i$ 为 4 字节对齐 padding。
-
-若每个 MPDU 中聚合 7 个 1500 B MSDU，则 A-MSDU 长度约为：
+在当前参数下：
 
 $$
-L_{\mathrm{AMSDU}}\approx7\times1516=10612\ \mathrm{B}
+L_{\mathrm{AMSDU},j}=7\times1516=10612\ \mathrm{B}
 $$
 
 每个 MPDU 还要加 MAC header 与 FCS，近似取：
@@ -360,55 +450,131 @@ $$
 L_{\mathrm{MAC+FCS}}\approx30\ \mathrm{B}
 $$
 
-则单个 MPDU 长度约为：
+因此单个 MPDU 长度近似为：
 
 $$
-L_{\mathrm{MPDU}}\approx30+10612=10642\ \mathrm{B}
+L_{\mathrm{MPDU},j}=L_{\mathrm{MAC+FCS}}+L_{\mathrm{AMSDU},j}
 $$
 
-A-MPDU 中每个 MPDU 前还有 delimiter，近似取：
+代入当前参数：
+
+$$
+L_{\mathrm{MPDU},j}=30+10612=10642\ \mathrm{B}
+$$
+
+### 7.2 单个 A-MPDU 子单元长度
+
+A-MPDU 中每个 MPDU 前有 delimiter，近似取：
 
 $$
 L_{\mathrm{delimiter}}=4\ \mathrm{B}
 $$
 
-同时还要对齐到 4 字节边界。若：
+每个 A-MPDU 子单元还要对齐到 4 字节边界。令：
 
 $$
-q_m=(4-(L_{\mathrm{MPDU}}\bmod 4))\bmod 4
+q_j=\left(4-(L_{\mathrm{MPDU},j}\bmod4)\right)\bmod4
 $$
 
-则单个 A-MPDU 子单元长度为：
+由于：
 
 $$
-L_{\mathrm{AMPDU,sub}}=4+L_{\mathrm{MPDU}}+q_m
+L_{\mathrm{MPDU},j}=10642\ \mathrm{B}
 $$
 
-在上面的近似中：
-
-```text
-L_MPDU = 10642 B
-10642 mod 4 = 2
-q_m = 2 B
-```
-
-因此：
-
 $$
-L_{\mathrm{AMPDU,sub}}\approx4+10642+2=10648\ \mathrm{B}
+10642\bmod4=2
 $$
 
-如果一次 A-MPDU 聚合 $N_{\mathrm{MPDU}}$ 个 MPDU，则：
+所以：
 
 $$
-L_{\mathrm{PSDU}}^{\mathrm{agg}}\approx10648N_{\mathrm{MPDU}}\ \mathrm{B}
+q_j=2\ \mathrm{B}
 $$
 
-更一般地写：
+于是单个 A-MPDU 子单元长度为：
 
 $$
-L_{\mathrm{PSDU}}^{\mathrm{agg}}=\sum_{m=1}^{N_{\mathrm{MPDU}}}(4+L_{\mathrm{MPDU},m}+q_m)
+L_{\mathrm{AMPDU,sub},j}=L_{\mathrm{delimiter}}+L_{\mathrm{MPDU},j}+q_j
 $$
+
+即：
+
+$$
+L_{\mathrm{AMPDU,sub},j}=4+10642+2=10648\ \mathrm{B}
+$$
+
+### 7.3 A-MPDU 字节上限对应的理论最大 MPDU 个数
+
+当前 A-MPDU 上限为：
+
+$$
+BE_{\mathrm{MaxAmpduSize}}=15523200\ \mathrm{B}
+$$
+
+如果只考虑 A-MPDU 最大字节数约束，则：
+
+$$
+N_{\mathrm{size},j}=\left\lfloor\frac{15523200}{10648}\right\rfloor=1457
+$$
+
+这个 $1457$ 只是由最大 A-MPDU 字节数给出的理论上限，不代表 ns-3 每次一定聚合 $1457$ 个 MPDU。实际 $N_{\mathrm{MPDU},j}$ 仍应由队列、Block ACK 窗口、TXOP、重传状态等共同决定。
+
+### 7.4 PSDU 总长度
+
+一般写法为：
+
+$$
+L_{\mathrm{PSDU},j}^{\mathrm{agg}}=\sum_{m=1}^{N_{\mathrm{MPDU},j}}\left(4+L_{\mathrm{MPDU},m}+q_m\right)
+$$
+
+如果每个 MPDU 长度近似相同，则：
+
+$$
+L_{\mathrm{PSDU},j}^{\mathrm{agg}}\approx N_{\mathrm{MPDU},j}L_{\mathrm{AMPDU,sub},j}
+$$
+
+代入当前参数：
+
+$$
+L_{\mathrm{PSDU},j}^{\mathrm{agg}}\approx10648N_{\mathrm{MPDU},j}\ \mathrm{B}
+$$
+
+如果取 $N_{\mathrm{MPDU},j}=64$ 作为简化例子，则：
+
+$$
+L_{\mathrm{PSDU},j}^{\mathrm{agg}}\approx10648\times64=681472\ \mathrm{B}
+$$
+
+对应有效负载为：
+
+$$
+L_{\mathrm{payload},j}^{\mathrm{agg}}=10500\times64=672000\ \mathrm{B}
+$$
+
+聚合开销为：
+
+$$
+L_{\mathrm{oh},j}^{\mathrm{agg}}=L_{\mathrm{PSDU},j}^{\mathrm{agg}}-L_{\mathrm{payload},j}^{\mathrm{agg}}
+$$
+
+即：
+
+$$
+L_{\mathrm{oh},j}^{\mathrm{agg}}=681472-672000=9472\ \mathrm{B}
+$$
+
+最终，当前参数下推荐在理论模型中使用：
+
+$$
+L_{\mathrm{payload},j}^{\mathrm{agg}}\approx10500N_{\mathrm{MPDU},j}\ \mathrm{B}
+$$
+
+$$
+L_{\mathrm{PSDU},j}^{\mathrm{agg}}\approx10648N_{\mathrm{MPDU},j}\ \mathrm{B}
+$$
+
+并保留 $N_{\mathrm{MPDU},j}$ 作为由 ns-3 MAC 聚合器动态决定的变量。
 
 ---
 
@@ -424,25 +590,25 @@ $$
 数据部分发送时间为：
 
 $$
-T_{\mathrm{data},j}=\frac{8L_{\mathrm{PSDU}}^{\mathrm{agg}}}{R_j}
+T_{\mathrm{data},j}=\frac{8L_{\mathrm{PSDU},j}^{\mathrm{agg}}}{R_j}
 $$
 
 一次成功聚合传输时间为：
 
 $$
-T_{\mathrm{succ},j}^{\mathrm{agg}}=T_{\mathrm{AIFS}}+E[T_{\mathrm{bo}}]+T_{\mathrm{PHY},j}+\frac{8L_{\mathrm{PSDU}}^{\mathrm{agg}}}{R_j}+T_{\mathrm{SIFS}}+T_{\mathrm{BA}}
+T_{\mathrm{succ},j}^{\mathrm{agg}}=T_{\mathrm{AIFS}}+E[T_{\mathrm{bo}}]+T_{\mathrm{PHY},j}+\frac{8L_{\mathrm{PSDU},j}^{\mathrm{agg}}}{R_j}+T_{\mathrm{SIFS}}+T_{\mathrm{BA}}
 $$
 
 最终聚合吞吐为：
 
 $$
-S_j^{\mathrm{agg}}=\frac{8L_{\mathrm{payload}}^{\mathrm{agg}}}{T_{\mathrm{succ},j}^{\mathrm{agg}}}
+S_j^{\mathrm{agg}}=\frac{8L_{\mathrm{payload},j}^{\mathrm{agg}}}{T_{\mathrm{succ},j}^{\mathrm{agg}}}
 $$
 
 如果需要把误包率也纳入吞吐近似，则可写为：
 
 $$
-S_j^{\mathrm{agg,eff}}\approx\frac{(1-PER_j)\,8L_{\mathrm{payload}}^{\mathrm{agg}}}{T_{\mathrm{succ},j}^{\mathrm{agg}}}
+S_j^{\mathrm{agg,eff}}\approx\frac{(1-PER_j)\,8L_{\mathrm{payload},j}^{\mathrm{agg}}}{T_{\mathrm{succ},j}^{\mathrm{agg}}}
 $$
 
 ---
@@ -458,7 +624,7 @@ $$
 其中：
 
 $$
-MCS_j=\max\{m:PER_m(SNR_j,L_{\mathrm{PSDU}}^{\mathrm{agg}})\le PER_{\mathrm{th}}\}
+MCS_j=\max\{m:PER_m(SNR_j,L_{\mathrm{PSDU},j}^{\mathrm{agg}})\le PER_{\mathrm{th}}\}
 $$
 
 或者若要更贴近 IdealWifiManager 的 BER 门限口径，则写为：
@@ -472,5 +638,6 @@ $$
 ```text
 1. ns-3 最新版本的默认误码模型可能使用表格误码模型或高阶 MCS 回退机制；
 2. 本文档中的 YANS 风格计算适合作为理论近似模型；
-3. 若希望仿真与理论完全一致，应在 ns-3 代码中显式设置 ErrorRateModel，并通过 trace 输出实际 MCS、PHY rate 和 PSDU 长度。
+3. N_MPDU,j 不应直接固定为由 BE_MaxAmpduSize 推出的最大值，而应视为 ns-3 MAC 聚合器动态决定的变量；
+4. 若希望仿真与理论完全一致，应在 ns-3 代码中显式设置 ErrorRateModel，并通过 trace 输出实际 MCS、PHY rate、N_MPDU 和 PSDU 长度。
 ```
