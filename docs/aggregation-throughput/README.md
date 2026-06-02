@@ -79,11 +79,19 @@ $$
 |---|---|
 | $T_{\mathrm{AIFS}}$ | 发送前的监听等待时间 |
 | $E[T_{\mathrm{bo}}]$ | 平均随机退避时间 |
-| $T_{\mathrm{PHY},j}$ | PHY 前导码和 PHY 头开销 |
+| $T_{\mathrm{PHY},j}$ | PHY 前导码和 PHY 头开销，理论计算中近似取 $T_{\mathrm{PHY},j}\approx52\ \mu s$ |
 | $L_{\mathrm{PSDU},j}^{\mathrm{agg}}$ | 聚合后在空口上传输的总 PSDU 比特数 |
 | $R_j(d_j)$ | STA 与接入点 `j` 之间的 PHY rate |
 | $T_{\mathrm{SIFS}}$ | 聚合数据帧与 Block ACK 之间的短帧间隔 |
 | $T_{\mathrm{BA}}$ | Block ACK 发送时间 |
+
+在当前 802.11be、160 MHz、2 空间流、$GI=800\ \mathrm{ns}$ 的理论近似中，可将 PHY 前导码和 PHY 头部开销统一取为：
+
+$$
+T_{\mathrm{PHY},j}\approx52\ \mu s.
+$$
+
+该项主要表示固定 PHY 开销。不同接入点之间的链路差异主要体现在 $R_j(d_j)$，即由距离、SNR 和 MCS 决定的数据发送速率，而不是体现在 $T_{\mathrm{PHY},j}$ 上。
 
 ---
 
@@ -179,6 +187,7 @@ $$
 | A-MPDU | `BE_MaxAmpduSize` | `15523200 B` | 聚合上限，不代表每次都发满 |
 | A-MSDU | `BE_MaxAmsduSize` | `11398 B` | 聚合上限 |
 | MSDU / MSS | $L_{\mathrm{MSDU}}$ | `1500 B` | 应用包 / TCP segment |
+| $T_{\mathrm{PHY},j}$ | PHY 前导码和 PHY 头开销 | `52 μs` | 802.11be、160 MHz、2SS、GI=800 ns 下的理论近似 |
 | 应用供给 | $\Lambda_{\mathrm{app}}$ | `20 Gbps` | 批量脚本实际：1 流 × 20 Gbps |
 | 统计窗口 | $T_{\mathrm{test}}$ | `4 s` | 批量脚本实际值 |
 | 预热时间 | $T_{\mathrm{prewarm}}$ | `1 s` | 批量脚本实际值 |
