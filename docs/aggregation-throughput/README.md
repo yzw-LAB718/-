@@ -315,7 +315,7 @@ $$
 MCS 可用 SNR 门限建模：
 
 $$
-MCS_j(d_{\mathrm{STA}-j})=\max\left\{m:SNR_j(d_{\mathrm{STA}-j})\ge\Gamma_m\right\}.
+MCS_j(d_{\mathrm{STA}-j})=\max_{m:\ SNR_j(d_{\mathrm{STA}-j})\ge\Gamma_m}m.
 $$
 
 最后得到：
