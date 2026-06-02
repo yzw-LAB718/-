@@ -200,41 +200,272 @@ $$
 
 因此，如果讨论**理论最小场景**，可以把应用层看作饱和供给；如果讨论**批量脚本实际输出结果**，应按 `1` 条 TCP 流、`20 Gbps` 单流速率、`1 s` 预热和 `4 s` 统计窗口理解。
 
-### 5.3 聚合负载的典型估算
+### 5.3 聚合有效负载与 PSDU 总长度估算
 
-由于应用包和 TCP segment 都为 `1500 B`，而 A-MSDU 最大尺寸约为 `11398 B`，若先忽略 A-MSDU 子帧头和 padding，则一个 A-MSDU 中最多可容纳约 7 个 1500 B MSDU：
-
-$$
-N_{\mathrm{MSDU}}\approx\left\lfloor\frac{11398}{1500}\right\rfloor=7.
-$$
-
-因此，每个 MPDU 内通过 A-MSDU 承载的有效负载可近似为：
+当前代码中，应用层包长 / TCP MSS 可取：
 
 $$
-L_{\mathrm{payload,per\ MPDU}}^{\mathrm{agg}}\approx7\times1500=10500\ \mathrm{B}=84000\ \mathrm{bit}.
+L_{\mathrm{MSDU}}=1500\ \mathrm{B}.
 $$
 
-推荐理论推导中取：
-
-| 参数 | 推荐取值 | 说明 |
-|---|---:|---|
-| $L_{\mathrm{MSDU}}$ | `1500 B` | 与代码一致 |
-| $N_{\mathrm{MSDU}}$ | `1 ~ 7`，常用近似 `7` | 由 A-MSDU 上限决定 |
-| $N_{\mathrm{MPDU},j}$ | 保留为变量 | 由队列、MCS、PPDU 时长、Block ACK 和调度过程决定 |
-| $T_{\mathrm{AIFS}}$ | `43 μs` | BE 业务常用近似 |
-| $\sigma$ | `9 μs` | 5 GHz OFDM 类 Wi-Fi 常用时隙 |
-| $CW_{\min}$ | `15` | BE 常用最小竞争窗口 |
-| $E[T_{\mathrm{bo}}]$ | `67.5 μs` | 由 `15/2 × 9 μs` 得到 |
-| $T_{\mathrm{SIFS}}$ | `16 μs` | 常用近似 |
-| $T_{\mathrm{BA}}$ | `30 ~ 60 μs` | 理论近似，ns-3 中实际自动计算 |
-
-需要注意：`15523200 B` 是 A-MPDU 聚合上限，不应直接当作每次实际发送长度。理论中更稳妥的写法是：
+代码同时开启 A-MSDU 与 A-MPDU 聚合，并设置：
 
 $$
-L_{\mathrm{payload},j}^{\mathrm{agg}}\approx10500N_{\mathrm{MPDU},j}\ \mathrm{B},
+BE_{\mathrm{MaxAmsduSize}}=11398\ \mathrm{B},\qquad
+BE_{\mathrm{MaxAmpduSize}}=15523200\ \mathrm{B}.
 $$
 
-并保留 $N_{\mathrm{MPDU},j}$ 作为变量。
+需要注意：`BE_MaxAmsduSize` 和 `BE_MaxAmpduSize` 都是**上限**，不代表 ns-3 每次一定发满。实际一次发送聚合多少 MPDU，由 MAC 聚合器根据队列、Block ACK 窗口、TXOP 限制、重传状态和聚合上限动态决定。
+
+#### 5.3.1 每个 A-MSDU 中的 MSDU 数量
+
+A-MSDU 子帧不仅包含 MSDU 有效负载，还包含 A-MSDU subframe header 和 4 字节对齐 padding。近似写为：
+
+$$
+\begin{aligned}
+L_{\mathrm{sub}}
+&=14+L_{\mathrm{MSDU}}+p,
+\\
+p
+&=\left(4-\left[(14+L_{\mathrm{MSDU}})\bmod4\right]\right)\bmod4.
+\end{aligned}
+$$
+
+代入 $L_{\mathrm{MSDU}}=1500\ \mathrm{B}$，有：
+
+$$
+\begin{aligned}
+14+1500&=1514,
+\\
+1514\bmod4&=2,
+\\
+p&=2\ \mathrm{B},
+\\
+L_{\mathrm{sub}}&=1516\ \mathrm{B}.
+\end{aligned}
+$$
+
+因此每个 MPDU 内部通过 A-MSDU 最多可聚合的 MSDU 数量近似为：
+
+$$
+\begin{aligned}
+N_{\mathrm{MSDU},j}
+&=\left\lfloor\frac{BE_{\mathrm{MaxAmsduSize}}}{L_{\mathrm{sub}}}\right\rfloor
+=\left\lfloor\frac{11398}{1516}\right\rfloor
+=7.
+\end{aligned}
+$$
+
+所以当前理论模型中可取：
+
+$$
+N_{\mathrm{MSDU},j}=7.
+$$
+
+#### 5.3.2 聚合有效负载长度
+
+一次 A-MPDU 中真正承载的 TCP / MSDU 有效数据量为：
+
+$$
+\begin{aligned}
+L_{\mathrm{payload},j}^{\mathrm{agg}}
+&=N_{\mathrm{MPDU},j}N_{\mathrm{MSDU},j}L_{\mathrm{MSDU}}.
+\end{aligned}
+$$
+
+代入当前参数：
+
+$$
+\begin{aligned}
+L_{\mathrm{payload},j}^{\mathrm{agg}}
+&=N_{\mathrm{MPDU},j}\times7\times1500,
+\\
+&=10500N_{\mathrm{MPDU},j}\ \mathrm{B}.
+\end{aligned}
+$$
+
+也就是说，若一次聚合中实际包含 $N_{\mathrm{MPDU},j}$ 个 MPDU，则有效负载近似为：
+
+$$
+L_{\mathrm{payload},j}^{\mathrm{agg}}\approx10500N_{\mathrm{MPDU},j}\ \mathrm{B}.
+$$
+
+#### 5.3.3 单个 MPDU 与 A-MPDU 子单元长度
+
+每个 MPDU 内的 A-MSDU 长度近似为：
+
+$$
+\begin{aligned}
+L_{\mathrm{A\text{-}MSDU}}
+&=N_{\mathrm{MSDU},j}L_{\mathrm{sub}}
+=7\times1516
+=10612\ \mathrm{B}.
+\end{aligned}
+$$
+
+每个 MPDU 还需要 MAC header 与 FCS。理论近似中可取：
+
+$$
+L_{\mathrm{MAC+FCS}}\approx30\ \mathrm{B}.
+$$
+
+因此单个 MPDU 长度近似为：
+
+$$
+\begin{aligned}
+L_{\mathrm{MPDU},j}
+&=L_{\mathrm{MAC+FCS}}+L_{\mathrm{A\text{-}MSDU}}
+\\
+&\approx30+10612
+=10642\ \mathrm{B}.
+\end{aligned}
+$$
+
+A-MPDU 中每个 MPDU 前还有 delimiter，近似取：
+
+$$
+L_{\mathrm{delimiter}}=4\ \mathrm{B}.
+$$
+
+同时 A-MPDU 子单元还需要 4 字节对齐。令：
+
+$$
+q_j=\left(4-(L_{\mathrm{MPDU},j}\bmod4)\right)\bmod4.
+$$
+
+由于：
+
+$$
+10642\bmod4=2,
+$$
+
+所以：
+
+$$
+q_j=2\ \mathrm{B}.
+$$
+
+于是单个 A-MPDU 子单元长度近似为：
+
+$$
+\begin{aligned}
+L_{\mathrm{AMPDU,sub},j}
+&=L_{\mathrm{delimiter}}+L_{\mathrm{MPDU},j}+q_j
+\\
+&=4+10642+2
+=10648\ \mathrm{B}.
+\end{aligned}
+$$
+
+#### 5.3.4 由 A-MPDU 字节上限得到的 MPDU 数量上界
+
+如果只考虑 A-MPDU 最大字节数约束，则：
+
+$$
+\begin{aligned}
+N_{\mathrm{size},j}
+&=\left\lfloor\frac{BE_{\mathrm{MaxAmpduSize}}}{L_{\mathrm{AMPDU,sub},j}}\right\rfloor
+\\
+&=\left\lfloor\frac{15523200}{10648}\right\rfloor
+=1457.
+\end{aligned}
+$$
+
+但是这个 $1457$ 只是由 `BE_MaxAmpduSize` 推出的理论字节上限，不应直接等同于实际每次发送的 $N_{\mathrm{MPDU},j}$。
+
+更稳妥的建模方式是：
+
+$$
+\begin{aligned}
+N_{\mathrm{MPDU},j}
+=\min\{&N_{\mathrm{queue},j},
+N_{\mathrm{BA},j},
+N_{\mathrm{TXOP},j},
+N_{\mathrm{size},j},
+N_{\mathrm{retry},j}\}.
+\end{aligned}
+$$
+
+其中：
+
+| 符号 | 含义 |
+|---|---|
+| $N_{\mathrm{queue},j}$ | 当前 MAC 队列中可用于同一 TID 聚合的 MPDU 数量 |
+| $N_{\mathrm{BA},j}$ | Block ACK 窗口允许的 MPDU 数量 |
+| $N_{\mathrm{TXOP},j}$ | 当前 TXOP / PPDU 时长允许放入的 MPDU 数量 |
+| $N_{\mathrm{size},j}$ | A-MPDU 最大字节数允许的 MPDU 数量 |
+| $N_{\mathrm{retry},j}$ | 重传状态、聚合规则和接收端能力带来的限制 |
+
+因此理论推导中建议保留 $N_{\mathrm{MPDU},j}$ 为变量，或者用合理上界做敏感性分析，而不是固定为 $1457$。
+
+#### 5.3.5 聚合后 PSDU 总长度
+
+空口真正发送的 PSDU 不是纯有效负载，而是包含 A-MPDU delimiter、MAC header、FCS、A-MSDU subframe header 和 padding 等开销。一般可写为：
+
+$$
+\begin{aligned}
+L_{\mathrm{PSDU},j}^{\mathrm{agg}}
+&=\sum_{m=1}^{N_{\mathrm{MPDU},j}}
+\left(4+L_{\mathrm{MPDU},m}+q_m\right).
+\end{aligned}
+$$
+
+如果每个 MPDU 长度近似相同，则：
+
+$$
+\begin{aligned}
+L_{\mathrm{PSDU},j}^{\mathrm{agg}}
+&\approx N_{\mathrm{MPDU},j}L_{\mathrm{AMPDU,sub},j}
+\\
+&\approx10648N_{\mathrm{MPDU},j}\ \mathrm{B}.
+\end{aligned}
+$$
+
+因此当前参数下可用的简化关系为：
+
+$$
+\begin{aligned}
+L_{\mathrm{payload},j}^{\mathrm{agg}}
+&\approx10500N_{\mathrm{MPDU},j}\ \mathrm{B},
+\\
+L_{\mathrm{PSDU},j}^{\mathrm{agg}}
+&\approx10648N_{\mathrm{MPDU},j}\ \mathrm{B},
+\\
+L_{\mathrm{oh},j}^{\mathrm{agg}}
+&=L_{\mathrm{PSDU},j}^{\mathrm{agg}}-L_{\mathrm{payload},j}^{\mathrm{agg}}
+\\
+&\approx148N_{\mathrm{MPDU},j}\ \mathrm{B}.
+\end{aligned}
+$$
+
+举例来说，如果临时取普通 Block ACK 窗口上限 $N_{\mathrm{MPDU},j}=64$ 做简化分析，则：
+
+$$
+\begin{aligned}
+L_{\mathrm{payload},j}^{\mathrm{agg}}
+&\approx10500\times64=672000\ \mathrm{B},
+\\
+L_{\mathrm{PSDU},j}^{\mathrm{agg}}
+&\approx10648\times64=681472\ \mathrm{B},
+\\
+L_{\mathrm{oh},j}^{\mathrm{agg}}
+&\approx9472\ \mathrm{B}.
+\end{aligned}
+$$
+
+最终建议在吞吐模型中使用：
+
+$$
+\begin{aligned}
+L_{\mathrm{payload},j}^{\mathrm{agg}}
+&\approx10500N_{\mathrm{MPDU},j}\ \mathrm{B},
+\\
+L_{\mathrm{PSDU},j}^{\mathrm{agg}}
+&\approx10648N_{\mathrm{MPDU},j}\ \mathrm{B},
+\end{aligned}
+$$
+
+并通过 ns-3 trace 校准实际的 $N_{\mathrm{MPDU},j}$ 和真实 PSDU 长度。
 
 ---
 
