@@ -176,19 +176,48 @@ $$
 
 ### 3.5 编码后的 BER
 
-YANS 风格模型会进一步考虑卷积编码带来的纠错增益。理论推导中可抽象写成：
+YANS 风格模型会进一步考虑卷积编码带来的纠错增益。理论推导中可把编码后的 bit error rate 写为：
 
 $$
-P_{b,\mathrm{coded},m}=F_{\mathrm{YANS}}(P_{b,m},r_m)
+P_{b,\mathrm{coded},m}\approx\min\left(1,\sum_{d=d_{\mathrm{free}}(r_m)}^{d_{\max}}a_d(r_m)P_d(P_{b,m})\right)
 $$
 
 其中：
 
 | 符号 | 含义 |
 |---|---|
-| $P_{b,m}$ | 调制后的未编码 BER |
+| $P_{b,m}$ | 第 $m$ 个 MCS 对应的未编码 BER |
 | $r_m$ | 当前 MCS 的编码率 |
-| $F_{\mathrm{YANS}}$ | YANS 中的编码误码近似函数 |
+| $d_{\mathrm{free}}(r_m)$ | 对应编码率下卷积码的自由距离 |
+| $a_d(r_m)$ | 对应编码率下的距离谱系数，表示距离为 $d$ 的错误事件权重 |
+| $P_d(P_{b,m})$ | 距离为 $d$ 的错误事件概率 |
+| $d_{\max}$ | 理论求和截断上限，用于近似计算 |
+
+距离为 $d$ 的错误事件概率可用二项分布形式近似。若 $d$ 为奇数：
+
+$$
+P_d(P_b)=\sum_{k=(d+1)/2}^{d}\binom{d}{k}P_b^k(1-P_b)^{d-k}
+$$
+
+若 $d$ 为偶数：
+
+$$
+P_d(P_b)=\frac{1}{2}\binom{d}{d/2}P_b^{d/2}(1-P_b)^{d/2}+\sum_{k=d/2+1}^{d}\binom{d}{k}P_b^k(1-P_b)^{d-k}
+$$
+
+因此，在理论链条中可以把未编码 BER 到编码后 BER 的关系写成：
+
+$$
+P_{b,m}\rightarrow P_d(P_{b,m})\rightarrow P_{b,\mathrm{coded},m}
+$$
+
+简化建模时，也可以把上面的卷积编码过程记为一个函数：
+
+$$
+P_{b,\mathrm{coded},m}=F_{\mathrm{YANS}}(P_{b,m},r_m)
+$$
+
+需要注意：这里的 $P_{b,\mathrm{coded},m}$ 是用于理论分析的 YANS 风格近似。若使用 ns-3 最新版本的默认误码模型，实际结果可能来自表格误码模型或高阶 MCS 回退机制，因此最终数值仍建议通过 trace 验证。
 
 ---
 
@@ -408,6 +437,12 @@ $$
 
 $$
 S_j^{\mathrm{agg}}=\frac{8L_{\mathrm{payload}}^{\mathrm{agg}}}{T_{\mathrm{succ},j}^{\mathrm{agg}}}
+$$
+
+如果需要把误包率也纳入吞吐近似，则可写为：
+
+$$
+S_j^{\mathrm{agg,eff}}\approx\frac{(1-PER_j)\,8L_{\mathrm{payload}}^{\mathrm{agg}}}{T_{\mathrm{succ},j}^{\mathrm{agg}}}
 $$
 
 ---
