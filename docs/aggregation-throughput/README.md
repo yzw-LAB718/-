@@ -2,7 +2,7 @@
 
 本文档说明当前 Wi-Fi Mesh 最小场景下的多帧聚合吞吐模型。
 
-> 显示说明：本文档已改用 GitHub 原生 LaTeX 数学公式，不再依赖 `latex.codecogs.com` 外链 SVG 图片，避免出现公式图片加载失败、只显示 `alt` 文本的问题。
+> 显示说明：本文档使用 GitHub 原生 LaTeX 数学公式。为避免 GitHub Markdown 将公式中的单独等号行误判为标题，所有多行公式均采用 `aligned` 写法，不再让 `=` 单独占一行。
 
 当前重点讨论的**最简单理论场景**为：
 
@@ -54,13 +54,7 @@ AIFS / DIFS
 
 ## 2. 多帧聚合传输时间
 
-对候选接入点
-
-$$
-j\in\{\mathrm{ONT},\mathrm{AP}\},
-$$
-
-一次成功的聚合发送过程可写为：
+对候选接入点 $j\in\{\mathrm{ONT},\mathrm{AP}\}$，一次成功的聚合发送过程可写为：
 
 ```text
 AIFS → Backoff → PHY Preamble → Aggregated Data → SIFS → Block ACK
@@ -69,14 +63,12 @@ AIFS → Backoff → PHY Preamble → Aggregated Data → SIFS → Block ACK
 不显式考虑传播时延时，一次成功聚合传输时间为：
 
 $$
+\begin{aligned}
 T_{\mathrm{succ},j}^{\mathrm{agg}}
-=
-T_{\mathrm{AIFS}}
-+E[T_{\mathrm{bo}}]
-+T_{\mathrm{PHY},j}
+&=T_{\mathrm{AIFS}}+E[T_{\mathrm{bo}}]+T_{\mathrm{PHY},j}
 +\frac{L_{\mathrm{PSDU},j}^{\mathrm{agg}}}{R_j(d_j)}
-+T_{\mathrm{SIFS}}
-+T_{\mathrm{BA}}.
++T_{\mathrm{SIFS}}+T_{\mathrm{BA}}.
+\end{aligned}
 $$
 
 如果后续考虑级联场景，建议使用第 8 章中的时延增强形式，把无线传播时延和有线回传时延显式加入路径时延模型。
@@ -100,18 +92,19 @@ $$
 设一次 A-MPDU 中包含 $N_{\mathrm{MPDU},j}$ 个 MPDU，每个 MPDU 内部通过 A-MSDU 聚合 $N_{\mathrm{MSDU},j}$ 个 MSDU。若每个 MSDU 的有效负载为 $L_{\mathrm{MSDU}}$，则一次聚合中真正承载的有效数据量为：
 
 $$
+\begin{aligned}
 L_{\mathrm{payload},j}^{\mathrm{agg}}
-=
-N_{\mathrm{MPDU},j}N_{\mathrm{MSDU},j}L_{\mathrm{MSDU}}.
+&=N_{\mathrm{MPDU},j}N_{\mathrm{MSDU},j}L_{\mathrm{MSDU}}.
+\end{aligned}
 $$
 
 空口上传输的 PSDU 总长度可以写成：
 
 $$
+\begin{aligned}
 L_{\mathrm{PSDU},j}^{\mathrm{agg}}
-=
-L_{\mathrm{payload},j}^{\mathrm{agg}}
-+L_{\mathrm{oh},j}^{\mathrm{agg}}.
+&=L_{\mathrm{payload},j}^{\mathrm{agg}}+L_{\mathrm{oh},j}^{\mathrm{agg}}.
+\end{aligned}
 $$
 
 其中 $L_{\mathrm{oh},j}^{\mathrm{agg}}$ 表示聚合相关开销，包括 MAC 头、FCS、A-MPDU delimiter、A-MSDU subframe header 和 padding 等。
@@ -137,24 +130,22 @@ $$
 聚合情况下，单链路吞吐定义为一次成功聚合发送中真正传输的有效数据量除以一次成功聚合发送所需时间：
 
 $$
+\begin{aligned}
 S_j^{\mathrm{agg}}(d_j)
-=
-\frac{L_{\mathrm{payload},j}^{\mathrm{agg}}}
-{T_{\mathrm{succ},j}^{\mathrm{agg}}}.
+&=\frac{L_{\mathrm{payload},j}^{\mathrm{agg}}}{T_{\mathrm{succ},j}^{\mathrm{agg}}}.
+\end{aligned}
 $$
 
 若 $L_{\mathrm{MSDU}}$ 以 Byte 为单位，则需要乘 8 转成 bit。于是可写成：
 
 $$
+\begin{aligned}
 S_j^{\mathrm{agg}}(d_j)
-=
-\frac{8N_{\mathrm{MPDU},j}N_{\mathrm{MSDU},j}L_{\mathrm{MSDU}}}
-{T_{\mathrm{AIFS}}
-+\frac{CW_{\min}}{2}\sigma
-+T_{\mathrm{PHY},j}
+&=\frac{8N_{\mathrm{MPDU},j}N_{\mathrm{MSDU},j}L_{\mathrm{MSDU}}}
+{T_{\mathrm{AIFS}}+\frac{CW_{\min}}{2}\sigma+T_{\mathrm{PHY},j}
 +\frac{8\left(N_{\mathrm{MPDU},j}N_{\mathrm{MSDU},j}L_{\mathrm{MSDU}}+L_{\mathrm{oh},j}^{\mathrm{agg}}\right)}{R_j(d_j)}
-+T_{\mathrm{SIFS}}
-+T_{\mathrm{BA}}}.
++T_{\mathrm{SIFS}}+T_{\mathrm{BA}}}.
+\end{aligned}
 $$
 
 这个式子描述的是无线链路的聚合服务能力。实际测得的 TCP goodput 还可能受到有线回传、应用层供给、TCP ACK 反向流量、TCP 窗口和级联时延限制，因此后文会再加路径瓶颈、应用层供给和时延增强模型。
@@ -214,20 +205,13 @@ $$
 由于应用包和 TCP segment 都为 `1500 B`，而 A-MSDU 最大尺寸约为 `11398 B`，若先忽略 A-MSDU 子帧头和 padding，则一个 A-MSDU 中最多可容纳约 7 个 1500 B MSDU：
 
 $$
-N_{\mathrm{MSDU}}
-\approx
-\left\lfloor\frac{11398}{1500}\right\rfloor
-=7.
+N_{\mathrm{MSDU}}\approx\left\lfloor\frac{11398}{1500}\right\rfloor=7.
 $$
 
 因此，每个 MPDU 内通过 A-MSDU 承载的有效负载可近似为：
 
 $$
-L_{\mathrm{payload,per\ MPDU}}^{\mathrm{agg}}
-\approx
-7\times1500
-=10500\ \mathrm{B}
-=84000\ \mathrm{bit}.
+L_{\mathrm{payload,per\ MPDU}}^{\mathrm{agg}}\approx7\times1500=10500\ \mathrm{B}=84000\ \mathrm{bit}.
 $$
 
 推荐理论推导中取：
@@ -247,9 +231,7 @@ $$
 需要注意：`15523200 B` 是 A-MPDU 聚合上限，不应直接当作每次实际发送长度。理论中更稳妥的写法是：
 
 $$
-L_{\mathrm{payload},j}^{\mathrm{agg}}
-\approx
-10500N_{\mathrm{MPDU},j}\ \mathrm{B},
+L_{\mathrm{payload},j}^{\mathrm{agg}}\approx10500N_{\mathrm{MPDU},j}\ \mathrm{B},
 $$
 
 并保留 $N_{\mathrm{MPDU},j}$ 作为变量。
@@ -258,11 +240,7 @@ $$
 
 ## 6. PHY rate 的计算
 
-本节只考虑最简单情景：一个 ONT、一个 AP、一个 STA、无外部干扰。候选接入点只有：
-
-$$
-j\in\{\mathrm{ONT},\mathrm{AP}\}.
-$$
+本节只考虑最简单情景：一个 ONT、一个 AP、一个 STA、无外部干扰。候选接入点只有 $j\in\{\mathrm{ONT},\mathrm{AP}\}$。
 
 聚合吞吐公式中的 $R_j(d_j)$ 表示 STA 与候选接入点之间的 PHY rate。由于当前代码是下行 TCP，因此更直观地看，是 ONT/AP 到 STA 的无线 PHY rate；从路径损耗角度看，它仍由 STA 与 ONT/AP 的距离决定。
 
@@ -279,18 +257,14 @@ $$
 两个候选无线链路距离分别为：
 
 $$
-d_{\mathrm{STA-ONT}}
-=
-\sqrt{x_{\mathrm{STA}}^2+y_{\mathrm{STA}}^2},
+d_{\mathrm{STA-ONT}}=\sqrt{x_{\mathrm{STA}}^2+y_{\mathrm{STA}}^2},
 $$
 
 $$
-d_{\mathrm{STA-AP}}
-=
-\sqrt{(x_{\mathrm{STA}}-10)^2+y_{\mathrm{STA}}^2}.
+d_{\mathrm{STA-AP}}=\sqrt{(x_{\mathrm{STA}}-10)^2+y_{\mathrm{STA}}^2}.
 $$
 
-实际计算路径损耗时，建议使用有效距离
+实际计算路径损耗时，建议使用有效距离：
 
 $$
 d_{\mathrm{eff}}=\max(d,d_0),\qquad d_0=1\ \mathrm{m},
@@ -303,25 +277,13 @@ $$
 无外部干扰时，距离通过路径损耗、接收功率和 SNR 间接影响 PHY rate：
 
 $$
-d_{\mathrm{STA}-j}
-\rightarrow
-PL_j(d_{\mathrm{STA}-j})
-\rightarrow
-P_{r,j}(d_{\mathrm{STA}-j})
-\rightarrow
-SNR_j(d_{\mathrm{STA}-j})
-\rightarrow
-MCS_j
-\rightarrow
-R_j.
+d_{\mathrm{STA}-j}\rightarrow PL_j(d_{\mathrm{STA}-j})\rightarrow P_{r,j}(d_{\mathrm{STA}-j})\rightarrow SNR_j(d_{\mathrm{STA}-j})\rightarrow MCS_j\rightarrow R_j.
 $$
 
 路径损耗模型可写为：
 
 $$
-PL_j(d_{\mathrm{STA}-j})
-=
-PL_0+10\alpha\log_{10}\left(\frac{d_{\mathrm{STA}-j}}{d_0}\right).
+PL_j(d_{\mathrm{STA}-j})=PL_0+10\alpha\log_{10}\left(\frac{d_{\mathrm{STA}-j}}{d_0}\right).
 $$
 
 其中 $d_0$ 是参考距离，通常可取 `1 m`；$PL_0$ 是参考距离处的路径损耗；$\alpha$ 是路径损耗指数。
@@ -329,17 +291,13 @@ $$
 接收功率为：
 
 $$
-P_{r,j}(d_{\mathrm{STA}-j})
-=
-P_t+G_t+G_{r,j}-PL_j(d_{\mathrm{STA}-j}).
+P_{r,j}(d_{\mathrm{STA}-j})=P_t+G_t+G_{r,j}-PL_j(d_{\mathrm{STA}-j}).
 $$
 
 无外部干扰时，信噪比为：
 
 $$
-SNR_j(d_{\mathrm{STA}-j})
-=
-P_{r,j}(d_{\mathrm{STA}-j})-N_j.
+SNR_j(d_{\mathrm{STA}-j})=P_{r,j}(d_{\mathrm{STA}-j})-N_j.
 $$
 
 噪声功率可近似写成：
@@ -351,36 +309,25 @@ $$
 其中 `-174 dBm/Hz` 是室温下的热噪声功率谱密度，$B_j$ 需要以 Hz 为单位。若 $B_j=160\ \mathrm{MHz}$ 且采用 $NF_j=7\ \mathrm{dB}$，则：
 
 $$
-N_j
-\approx
--174+10\log_{10}(160\times10^6)+7
-\approx
--84.96\ \mathrm{dBm}.
+N_j\approx-174+10\log_{10}(160\times10^6)+7\approx-84.96\ \mathrm{dBm}.
 $$
 
 MCS 可用 SNR 门限建模：
 
 $$
-MCS_j(d_{\mathrm{STA}-j})
-=
-\max\left\{m:SNR_j(d_{\mathrm{STA}-j})\ge\Gamma_m\right\}.
+MCS_j(d_{\mathrm{STA}-j})=\max\left\{m:SNR_j(d_{\mathrm{STA}-j})\ge\Gamma_m\right\}.
 $$
 
 最后得到：
 
 $$
-R_j(d_{\mathrm{STA}-j})
-=
-R_{MCS_j(d_{\mathrm{STA}-j})}(B_j,NSS_j,GI_j).
+R_j(d_{\mathrm{STA}-j})=R_{MCS_j(d_{\mathrm{STA}-j})}(B_j,NSS_j,GI_j).
 $$
 
 在当前代码配置下，带宽、空间流和 GI 固定，因此：
 
 $$
-R_j(d_{\mathrm{STA}-j})
-=
-R_{MCS_j(SNR_j(d_{\mathrm{STA}-j}))}
-(160\ \mathrm{MHz},2,800\ \mathrm{ns}).
+R_j(d_{\mathrm{STA}-j})=R_{MCS_j(SNR_j(d_{\mathrm{STA}-j}))}(160\ \mathrm{MHz},2,800\ \mathrm{ns}).
 $$
 
 ### 6.3 频段为什么没有直接出现在 PHY rate 表达式中
@@ -396,40 +343,25 @@ $$
 若 STA 直接接入 ONT，下行路径为 ONT 到 STA：
 
 $$
-S_{\mathrm{path,ONT}}^{\mathrm{agg}}
-=
-S_{\mathrm{ONT}\to\mathrm{STA}}^{\mathrm{agg}}
-(d_{\mathrm{STA-ONT}}).
+S_{\mathrm{path,ONT}}^{\mathrm{agg}}=S_{\mathrm{ONT}\to\mathrm{STA}}^{\mathrm{agg}}(d_{\mathrm{STA-ONT}}).
 $$
 
 若 STA 接入 AP，下行路径为 ONT 先经有线链路到 AP，再由 AP 通过 Wi-Fi 发给 STA：
 
 $$
-S_{\mathrm{path,AP}}^{\mathrm{agg}}
-=
-\min\left(
-C_{\mathrm{eth}},
-S_{\mathrm{AP}\to\mathrm{STA}}^{\mathrm{agg}}
-(d_{\mathrm{STA-AP}})
-\right).
+S_{\mathrm{path,AP}}^{\mathrm{agg}}=\min\left(C_{\mathrm{eth}},S_{\mathrm{AP}\to\mathrm{STA}}^{\mathrm{agg}}(d_{\mathrm{STA-AP}})\right).
 $$
 
 由于当前有线回传容量为 `10 Gbps`，通常远大于单条 Wi-Fi 链路吞吐，因此在最小场景中常可近似为：
 
 $$
-S_{\mathrm{path,AP}}^{\mathrm{agg}}
-\approx
-S_{\mathrm{AP}\to\mathrm{STA}}^{\mathrm{agg}}
-(d_{\mathrm{STA-AP}}).
+S_{\mathrm{path,AP}}^{\mathrm{agg}}\approx S_{\mathrm{AP}\to\mathrm{STA}}^{\mathrm{agg}}(d_{\mathrm{STA-AP}}).
 $$
 
 最终接入选择为：
 
 $$
-j^*
-=
-\arg\max_{j\in\{\mathrm{ONT},\mathrm{AP}\}}
-S_{\mathrm{path},j}^{\mathrm{agg}}.
+j^*=\arg\max_{j\in\{\mathrm{ONT},\mathrm{AP}\}}S_{\mathrm{path},j}^{\mathrm{agg}}.
 $$
 
 ### 7.2 应用层供给限制
@@ -437,17 +369,13 @@ $$
 实际测得吞吐还受到应用层提供流量的限制，因此可以写成：
 
 $$
-S_{\mathrm{meas},j}
-=
-\min\left(S_{\mathrm{path},j},\Lambda_{\mathrm{app}}\right).
+S_{\mathrm{meas},j}=\min\left(S_{\mathrm{path},j},\Lambda_{\mathrm{app}}\right).
 $$
 
 批量脚本实际使用 `1` 条 TCP 流、单流应用速率 `20 Gbps`，因此：
 
 $$
-\Lambda_{\mathrm{app}}
-=1\times20\ \mathrm{Gbps}
-=20\ \mathrm{Gbps}.
+\Lambda_{\mathrm{app}}=1\times20\ \mathrm{Gbps}=20\ \mathrm{Gbps}.
 $$
 
 通常有：
@@ -459,9 +387,7 @@ $$
 因此当前最小场景可以近似看作饱和发送：
 
 $$
-S_{\mathrm{meas},j}
-\approx
-S_{\mathrm{path},j}.
+S_{\mathrm{meas},j}\approx S_{\mathrm{path},j}.
 $$
 
 ---
@@ -475,9 +401,7 @@ $$
 无线传播时延可写为：
 
 $$
-\tau_{\mathrm{wifi},j}
-=
-\frac{d_{\mathrm{STA}-j}}{c},
+\tau_{\mathrm{wifi},j}=\frac{d_{\mathrm{STA}-j}}{c},
 $$
 
 其中 $c$ 为电磁波传播速度，近似取 $3\times10^8\ \mathrm{m/s}$。
@@ -485,15 +409,12 @@ $$
 严格写法可以在无线成功聚合传输时间中加入 DATA 和 Block ACK 的往返传播时延：
 
 $$
+\begin{aligned}
 T_{\mathrm{succ},j}^{\mathrm{agg,delay}}
-=
-T_{\mathrm{AIFS}}
-+E[T_{\mathrm{bo}}]
-+T_{\mathrm{PHY},j}
+&=T_{\mathrm{AIFS}}+E[T_{\mathrm{bo}}]+T_{\mathrm{PHY},j}
 +\frac{L_{\mathrm{PSDU},j}^{\mathrm{agg}}}{R_j(d_j)}
-+T_{\mathrm{SIFS}}
-+T_{\mathrm{BA}}
-+2\tau_{\mathrm{wifi},j}.
++T_{\mathrm{SIFS}}+T_{\mathrm{BA}}+2\tau_{\mathrm{wifi},j}.
+\end{aligned}
 $$
 
 当前米级 Wi-Fi 场景中，例如距离为 `10 m` 时，单程无线传播时延约为 `33 ns`，往返约 `66 ns`，远小于 AIFS、随机退避、SIFS 等微秒级开销。因此在单跳吞吐主公式中可以忽略；但在级联跳数较多时，多个有线 / 无线传播时延会累积，需要在端到端时延模型中保留。
@@ -509,26 +430,19 @@ ONT → AP → STA
 除了 AP 到 STA 的无线服务时间，还存在 ONT 到 AP 的有线传输与传播时延。可以写成：
 
 $$
-D_{\mathrm{path,AP}}
-=
-\frac{L_{\mathrm{payload}}}{C_{\mathrm{eth}}}
-+\tau_{\mathrm{eth}}
-+T_{\mathrm{succ,AP}}^{\mathrm{agg,delay}}.
+D_{\mathrm{path,AP}}=\frac{L_{\mathrm{payload}}}{C_{\mathrm{eth}}}+\tau_{\mathrm{eth}}+T_{\mathrm{succ,AP}}^{\mathrm{agg,delay}}.
 $$
 
 其中当前代码典型值为：
 
 $$
-C_{\mathrm{eth}}=10\ \mathrm{Gbps},\qquad
-\tau_{\mathrm{eth}}=500\ \mathrm{ns}.
+C_{\mathrm{eth}}=10\ \mathrm{Gbps},\qquad \tau_{\mathrm{eth}}=500\ \mathrm{ns}.
 $$
 
 如果采用保守的“端到端服务时间”模型，则 AP 路径的时延增强吞吐可写成：
 
 $$
-S_{\mathrm{path,AP}}^{\mathrm{delay}}
-=
-\frac{L_{\mathrm{payload}}}{D_{\mathrm{path,AP}}}.
+S_{\mathrm{path,AP}}^{\mathrm{delay}}=\frac{L_{\mathrm{payload}}}{D_{\mathrm{path,AP}}}.
 $$
 
 不过需要注意：对于连续 TCP 流，网络通常存在流水线传输，稳态吞吐更接近瓶颈链路容量；固定传播时延主要影响端到端 delay 和 TCP RTT，而不一定直接按上述端到端服务时间线性降低稳态吞吐。
@@ -538,33 +452,29 @@ $$
 若后续考虑多级 AP 级联，路径中可能包含多个无线跳和多个有线跳。设路径中有 $H$ 个无线跳、$K$ 个有线跳，则端到端时延可以写成：
 
 $$
+\begin{aligned}
 D_{\mathrm{E2E}}
-=
-\sum_{h=1}^{H}T_{\mathrm{succ},h}^{\mathrm{agg,delay}}
-+
-\sum_{k=1}^{K}\left(
-\frac{L_{\mathrm{payload}}}{C_{\mathrm{eth},k}}
-+\tau_{\mathrm{eth},k}
-\right).
+&=\sum_{h=1}^{H}T_{\mathrm{succ},h}^{\mathrm{agg,delay}}
++\sum_{k=1}^{K}\left(\frac{L_{\mathrm{payload}}}{C_{\mathrm{eth},k}}+\tau_{\mathrm{eth},k}\right).
+\end{aligned}
 $$
 
 对应的保守服务时间吞吐为：
 
 $$
+\begin{aligned}
 S_{\mathrm{E2E}}^{\mathrm{service}}
-=
-\frac{L_{\mathrm{payload}}}{D_{\mathrm{E2E}}}.
+&=\frac{L_{\mathrm{payload}}}{D_{\mathrm{E2E}}}.
+\end{aligned}
 $$
 
 如果采用稳态流水线视角，则端到端吞吐更接近路径中各跳容量的最小值：
 
 $$
+\begin{aligned}
 S_{\mathrm{E2E}}^{\mathrm{bottleneck}}
-=
-\min\left(
-\min_h S_{\mathrm{wireless},h}^{\mathrm{agg}},
-\min_k C_{\mathrm{eth},k}
-\right).
+&=\min\left(\min_h S_{\mathrm{wireless},h}^{\mathrm{agg}},\min_k C_{\mathrm{eth},k}\right).
+\end{aligned}
 $$
 
 两种写法的区别是：
@@ -577,9 +487,7 @@ $$
 在 TCP 场景中，级联时延还会增大 RTT。若 TCP 发送/接收窗口有限，吞吐还可能受到窗口限制：
 
 $$
-S_{\mathrm{TCP}}
-\le
-\frac{W_{\mathrm{TCP}}}{RTT}.
+S_{\mathrm{TCP}}\le\frac{W_{\mathrm{TCP}}}{RTT}.
 $$
 
 因此，后续做级联分析时，建议同时保留：
@@ -613,10 +521,7 @@ $$
 如果后续考虑 OBSS 干扰，应改成：
 
 $$
-SINR_j
-=
-P_{r,j}
--10\log_{10}\left(10^{N_j/10}+10^{I_j/10}\right).
+SINR_j=P_{r,j}-10\log_{10}\left(10^{N_j/10}+10^{I_j/10}\right).
 $$
 
 其中 $I_j$ 表示干扰功率。最小场景下可取 $I_j=0$。注意不能直接写成 `Pr - N - I`，因为噪声和干扰都是功率，必须先在线性域相加。
@@ -628,9 +533,7 @@ $$
 如果令：
 
 $$
-N_{\mathrm{MPDU},j}=1,\qquad
-N_{\mathrm{MSDU},j}=1,\qquad
-T_{\mathrm{BA}}\rightarrow T_{\mathrm{ACK}},
+N_{\mathrm{MPDU},j}=1,\qquad N_{\mathrm{MSDU},j}=1,\qquad T_{\mathrm{BA}}\rightarrow T_{\mathrm{ACK}},
 $$
 
 则聚合模型退化为单帧模型。两者结构都是：
