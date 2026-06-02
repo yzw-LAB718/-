@@ -1,6 +1,8 @@
 # 多帧聚合吞吐模型说明
 
-本文档说明当前 Wi-Fi Mesh 最小场景下的多帧聚合吞吐模型。为了避免公式在 GitHub 中不渲染，关键数学表达式均使用 SVG 公式图片呈现。
+本文档说明当前 Wi-Fi Mesh 最小场景下的多帧聚合吞吐模型。
+
+> 显示说明：本文档已改用 GitHub 原生 LaTeX 数学公式，不再依赖 `latex.codecogs.com` 外链 SVG 图片，避免出现公式图片加载失败、只显示 `alt` 文本的问题。
 
 当前重点讨论的**最简单理论场景**为：
 
@@ -52,13 +54,30 @@ AIFS / DIFS
 
 ## 2. 多帧聚合传输时间
 
-对候选接入点 <img alt="j in ONT AP" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20j%5Cin%5C%7B%5Cmathrm%7BONT%7D%2C%5Cmathrm%7BAP%7D%5C%7D" />，一次成功的聚合发送过程可写为：
+对候选接入点
 
-<p align="center"><img alt="aggregate process" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20%5Cmathrm%7BAIFS%7D%5Crightarrow%5Cmathrm%7BBackoff%7D%5Crightarrow%5Cmathrm%7BPHY%5C%20Preamble%7D%5Crightarrow%5Cmathrm%7BAggregated%5C%20Data%7D%5Crightarrow%5Cmathrm%7BSIFS%7D%5Crightarrow%5Cmathrm%7BBlock%5C%20ACK%7D" /></p>
+$$
+j\in\{\mathrm{ONT},\mathrm{AP}\},
+$$
+
+一次成功的聚合发送过程可写为：
+
+```text
+AIFS → Backoff → PHY Preamble → Aggregated Data → SIFS → Block ACK
+```
 
 不显式考虑传播时延时，一次成功聚合传输时间为：
 
-<p align="center"><img alt="Tsucc agg" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20T_%7B%5Cmathrm%7Bsucc%7D%2Cj%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%3DT_%7B%5Cmathrm%7BAIFS%7D%7D%2BE%5BT_%7B%5Cmathrm%7Bbo%7D%7D%5D%2BT_%7B%5Cmathrm%7BPHY%7D%2Cj%7D%2B%5Cfrac%7BL_%7B%5Cmathrm%7BPSDU%7D%2Cj%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%7D%7BR_j%28d_j%29%7D%2BT_%7B%5Cmathrm%7BSIFS%7D%7D%2BT_%7B%5Cmathrm%7BBA%7D%7D" /></p>
+$$
+T_{\mathrm{succ},j}^{\mathrm{agg}}
+=
+T_{\mathrm{AIFS}}
++E[T_{\mathrm{bo}}]
++T_{\mathrm{PHY},j}
++\frac{L_{\mathrm{PSDU},j}^{\mathrm{agg}}}{R_j(d_j)}
++T_{\mathrm{SIFS}}
++T_{\mathrm{BA}}.
+$$
 
 如果后续考虑级联场景，建议使用第 8 章中的时延增强形式，把无线传播时延和有线回传时延显式加入路径时延模型。
 
@@ -66,35 +85,50 @@ AIFS / DIFS
 
 | 符号 | 含义 |
 |---|---|
-| <img alt="T_AIFS" src="https://latex.codecogs.com/svg.image?T_%7B%5Cmathrm%7BAIFS%7D%7D" /> | 发送前的监听等待时间 |
-| <img alt="E_T_bo" src="https://latex.codecogs.com/svg.image?E%5BT_%7B%5Cmathrm%7Bbo%7D%7D%5D" /> | 平均随机退避时间 |
-| <img alt="T_PHY_j" src="https://latex.codecogs.com/svg.image?T_%7B%5Cmathrm%7BPHY%7D%2Cj%7D" /> | PHY 前导码和 PHY 头开销 |
-| <img alt="L_PSDU_agg" src="https://latex.codecogs.com/svg.image?L_%7B%5Cmathrm%7BPSDU%7D%2Cj%7D%5E%7B%5Cmathrm%7Bagg%7D%7D" /> | 聚合后在空口上传输的总 PSDU 比特数 |
-| <img alt="R_j_d_j" src="https://latex.codecogs.com/svg.image?R_j%28d_j%29" /> | STA 与接入点 `j` 之间的 PHY rate |
-| <img alt="T_SIFS" src="https://latex.codecogs.com/svg.image?T_%7B%5Cmathrm%7BSIFS%7D%7D" /> | 聚合数据帧与 Block ACK 之间的短帧间隔 |
-| <img alt="T_BA" src="https://latex.codecogs.com/svg.image?T_%7B%5Cmathrm%7BBA%7D%7D" /> | Block ACK 发送时间 |
+| $T_{\mathrm{AIFS}}$ | 发送前的监听等待时间 |
+| $E[T_{\mathrm{bo}}]$ | 平均随机退避时间 |
+| $T_{\mathrm{PHY},j}$ | PHY 前导码和 PHY 头开销 |
+| $L_{\mathrm{PSDU},j}^{\mathrm{agg}}$ | 聚合后在空口上传输的总 PSDU 比特数 |
+| $R_j(d_j)$ | STA 与接入点 `j` 之间的 PHY rate |
+| $T_{\mathrm{SIFS}}$ | 聚合数据帧与 Block ACK 之间的短帧间隔 |
+| $T_{\mathrm{BA}}$ | Block ACK 发送时间 |
 
 ---
 
 ## 3. 聚合负载建模
 
-设一次 A-MPDU 中包含 <img alt="N_MPDU_j" src="https://latex.codecogs.com/svg.image?N_%7B%5Cmathrm%7BMPDU%7D%2Cj%7D" /> 个 MPDU，每个 MPDU 内部通过 A-MSDU 聚合 <img alt="N_MSDU_j" src="https://latex.codecogs.com/svg.image?N_%7B%5Cmathrm%7BMSDU%7D%2Cj%7D" /> 个 MSDU。若每个 MSDU 的有效负载为 <img alt="L_MSDU" src="https://latex.codecogs.com/svg.image?L_%7B%5Cmathrm%7BMSDU%7D%7D" />，则一次聚合中真正承载的有效数据量为：
+设一次 A-MPDU 中包含 $N_{\mathrm{MPDU},j}$ 个 MPDU，每个 MPDU 内部通过 A-MSDU 聚合 $N_{\mathrm{MSDU},j}$ 个 MSDU。若每个 MSDU 的有效负载为 $L_{\mathrm{MSDU}}$，则一次聚合中真正承载的有效数据量为：
 
-<p align="center"><img alt="Lpayload agg" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20L_%7B%5Cmathrm%7Bpayload%7D%2Cj%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%3DN_%7B%5Cmathrm%7BMPDU%7D%2Cj%7DN_%7B%5Cmathrm%7BMSDU%7D%2Cj%7DL_%7B%5Cmathrm%7BMSDU%7D%7D" /></p>
+$$
+L_{\mathrm{payload},j}^{\mathrm{agg}}
+=
+N_{\mathrm{MPDU},j}N_{\mathrm{MSDU},j}L_{\mathrm{MSDU}}.
+$$
 
 空口上传输的 PSDU 总长度可以写成：
 
-<p align="center"><img alt="Lpsdu agg" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20L_%7B%5Cmathrm%7BPSDU%7D%2Cj%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%3DL_%7B%5Cmathrm%7Bpayload%7D%2Cj%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%2BL_%7B%5Cmathrm%7Boh%7D%2Cj%7D%5E%7B%5Cmathrm%7Bagg%7D%7D" /></p>
+$$
+L_{\mathrm{PSDU},j}^{\mathrm{agg}}
+=
+L_{\mathrm{payload},j}^{\mathrm{agg}}
++L_{\mathrm{oh},j}^{\mathrm{agg}}.
+$$
 
-其中 <img alt="L_oh" src="https://latex.codecogs.com/svg.image?L_%7B%5Cmathrm%7Boh%7D%2Cj%7D%5E%7B%5Cmathrm%7Bagg%7D%7D" /> 表示聚合相关开销，包括 MAC 头、FCS、A-MPDU delimiter、A-MSDU subframe header 和 padding 等。
+其中 $L_{\mathrm{oh},j}^{\mathrm{agg}}$ 表示聚合相关开销，包括 MAC 头、FCS、A-MPDU delimiter、A-MSDU subframe header 和 padding 等。
 
 如果只考虑 A-MPDU、不考虑 A-MSDU，可以令：
 
-<p align="center"><img alt="N_MSDU_1" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20N_%7B%5Cmathrm%7BMSDU%7D%2Cj%7D%3D1" /></p>
+$$
+N_{\mathrm{MSDU},j}=1.
+$$
 
 如果退化为单帧模型，可以令：
 
-<p align="center"><img alt="single frame limits" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20N_%7B%5Cmathrm%7BMPDU%7D%2Cj%7D%3D1%2C%5Cquad%20N_%7B%5Cmathrm%7BMSDU%7D%2Cj%7D%3D1%2C%5Cquad%20T_%7B%5Cmathrm%7BBA%7D%7D%5Crightarrow%20T_%7B%5Cmathrm%7BACK%7D%7D" /></p>
+$$
+N_{\mathrm{MPDU},j}=1,\qquad
+N_{\mathrm{MSDU},j}=1,\qquad
+T_{\mathrm{BA}}\rightarrow T_{\mathrm{ACK}}.
+$$
 
 ---
 
@@ -102,13 +136,28 @@ AIFS / DIFS
 
 聚合情况下，单链路吞吐定义为一次成功聚合发送中真正传输的有效数据量除以一次成功聚合发送所需时间：
 
-<p align="center"><img alt="S agg def" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20S_j%5E%7B%5Cmathrm%7Bagg%7D%7D%28d_j%29%3D%5Cfrac%7BL_%7B%5Cmathrm%7Bpayload%7D%2Cj%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%7D%7BT_%7B%5Cmathrm%7Bsucc%7D%2Cj%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%7D" /></p>
+$$
+S_j^{\mathrm{agg}}(d_j)
+=
+\frac{L_{\mathrm{payload},j}^{\mathrm{agg}}}
+{T_{\mathrm{succ},j}^{\mathrm{agg}}}.
+$$
 
-若 <img alt="L_MSDU" src="https://latex.codecogs.com/svg.image?L_%7B%5Cmathrm%7BMSDU%7D%7D" /> 以 Byte 为单位，则需要乘 8 转成 bit。于是可写成：
+若 $L_{\mathrm{MSDU}}$ 以 Byte 为单位，则需要乘 8 转成 bit。于是可写成：
 
-<p align="center"><img alt="S agg byte" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20S_j%5E%7B%5Cmathrm%7Bagg%7D%7D%28d_j%29%3D%5Cfrac%7B8N_%7B%5Cmathrm%7BMPDU%7D%2Cj%7DN_%7B%5Cmathrm%7BMSDU%7D%2Cj%7DL_%7B%5Cmathrm%7BMSDU%7D%7D%7D%7BT_%7B%5Cmathrm%7BAIFS%7D%7D%2B%5Cfrac%7BCW_%7B%5Cmin%7D%7D%7B2%7D%5Csigma%2BT_%7B%5Cmathrm%7BPHY%7D%2Cj%7D%2B%5Cfrac%7B8%5Cleft%28N_%7B%5Cmathrm%7BMPDU%7D%2Cj%7DN_%7B%5Cmathrm%7BMSDU%7D%2Cj%7DL_%7B%5Cmathrm%7BMSDU%7D%7D%2BL_%7B%5Cmathrm%7Boh%7D%2Cj%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%5Cright%29%7D%7BR_j%28d_j%29%7D%2BT_%7B%5Cmathrm%7BSIFS%7D%7D%2BT_%7B%5Cmathrm%7BBA%7D%7D%7D" /></p>
+$$
+S_j^{\mathrm{agg}}(d_j)
+=
+\frac{8N_{\mathrm{MPDU},j}N_{\mathrm{MSDU},j}L_{\mathrm{MSDU}}}
+{T_{\mathrm{AIFS}}
++\frac{CW_{\min}}{2}\sigma
++T_{\mathrm{PHY},j}
++\frac{8\left(N_{\mathrm{MPDU},j}N_{\mathrm{MSDU},j}L_{\mathrm{MSDU}}+L_{\mathrm{oh},j}^{\mathrm{agg}}\right)}{R_j(d_j)}
++T_{\mathrm{SIFS}}
++T_{\mathrm{BA}}}.
+$$
 
-这个式子描述的是无线链路的聚合服务能力。实际测得吞吐还可能受到有线回传、应用层供给和级联时延限制，因此后文会再加路径瓶颈、应用层供给和时延增强模型。
+这个式子描述的是无线链路的聚合服务能力。实际测得的 TCP goodput 还可能受到有线回传、应用层供给、TCP ACK 反向流量、TCP 窗口和级联时延限制，因此后文会再加路径瓶颈、应用层供给和时延增强模型。
 
 ---
 
@@ -122,26 +171,26 @@ AIFS / DIFS
 | 方向 | TCP 方向 | 下行 | ONT 向 STA 发送 |
 | 接入选择 | 候选接入点 | `ONT`、`AP` | STA 二选一接入 |
 | 回传 | AP-ONT | 有线 | AP 通过 ONT 连接外部网络 |
-| 回传速率 | <img alt="C_eth" src="https://latex.codecogs.com/svg.image?C_%7B%5Cmathrm%7Beth%7D" /> | `10 Gbps` | 通常不是瓶颈 |
-| 回传时延 | <img alt="tau_eth" src="https://latex.codecogs.com/svg.image?%5Ctau_%7B%5Cmathrm%7Beth%7D" /> | `500 ns` | 单跳影响很小，级联时建议保留 |
+| 回传速率 | $C_{\mathrm{eth}}$ | `10 Gbps` | 通常不是瓶颈 |
+| 回传时延 | $\tau_{\mathrm{eth}}$ | `500 ns` | 单跳影响很小，级联时建议保留 |
 | 外部干扰 | OBSS | 关闭 | 最小理论场景 |
 | 无线标准 | `WifiStandard` | `802.11be` | 代码配置 |
 | 频段 | band | `5 GHz` | `BAND_5GHZ` |
 | 信道号 | `ChannelNumber` | `50` | 代码配置 |
-| 信道带宽 | <img alt="B" src="https://latex.codecogs.com/svg.image?B" /> | `160 MHz` | 进入 PHY rate |
-| 空间流数 | <img alt="NSS" src="https://latex.codecogs.com/svg.image?NSS" /> | `2` | 进入 PHY rate |
-| Guard Interval | <img alt="GI" src="https://latex.codecogs.com/svg.image?GI" /> | `800 ns` | 进入 PHY rate |
+| 信道带宽 | $B$ | `160 MHz` | 进入 PHY rate |
+| 空间流数 | $NSS$ | `2` | 进入 PHY rate |
+| Guard Interval | $GI$ | `800 ns` | 进入 PHY rate |
 | 速率控制 | `RemoteStationManager` | `IdealWifiManager` | 自动选择 MCS / PHY rate |
-| 发射功率 | <img alt="P_t" src="https://latex.codecogs.com/svg.image?P_t" /> | `20 dBm` | 进入接收功率计算 |
+| 发射功率 | $P_t$ | `20 dBm` | 进入接收功率计算 |
 | 路损模型 | Loss Model | `LogDistancePropagationLossModel` | 距离影响 SNR |
 | 传播时延 | Delay Model | `ConstantSpeedPropagationDelayModel` | 单跳很小，级联时可累积 |
 | RTS/CTS | `RtsCtsThreshold` | `999999` | 基本不触发 RTS/CTS |
 | A-MPDU | `BE_MaxAmpduSize` | `15523200 B` | 聚合上限，不代表每次都发满 |
 | A-MSDU | `BE_MaxAmsduSize` | `11398 B` | 聚合上限 |
-| MSDU / MSS | <img alt="L_MSDU" src="https://latex.codecogs.com/svg.image?L_%7B%5Cmathrm%7BMSDU%7D%7D" /> | `1500 B` | 应用包 / TCP segment |
-| 应用供给 | <img alt="Lambda_app" src="https://latex.codecogs.com/svg.image?%5CLambda_%7B%5Cmathrm%7Bapp%7D" /> | `20 Gbps` | 批量脚本实际：1 流 × 20 Gbps |
-| 统计窗口 | <img alt="T_test" src="https://latex.codecogs.com/svg.image?T_%7B%5Cmathrm%7Btest%7D" /> | `4 s` | 批量脚本实际值 |
-| 预热时间 | <img alt="T_prewarm" src="https://latex.codecogs.com/svg.image?T_%7B%5Cmathrm%7Bprewarm%7D" /> | `1 s` | 批量脚本实际值 |
+| MSDU / MSS | $L_{\mathrm{MSDU}}$ | `1500 B` | 应用包 / TCP segment |
+| 应用供给 | $\Lambda_{\mathrm{app}}$ | `20 Gbps` | 批量脚本实际：1 流 × 20 Gbps |
+| 统计窗口 | $T_{\mathrm{test}}$ | `4 s` | 批量脚本实际值 |
+| 预热时间 | $T_{\mathrm{prewarm}}$ | `1 s` | 批量脚本实际值 |
 | seed | runs | `1,2,3` | 三轮取平均 |
 
 ### 5.2 C++ 默认值与批量脚本实际值的区别
@@ -164,31 +213,46 @@ AIFS / DIFS
 
 由于应用包和 TCP segment 都为 `1500 B`，而 A-MSDU 最大尺寸约为 `11398 B`，若先忽略 A-MSDU 子帧头和 padding，则一个 A-MSDU 中最多可容纳约 7 个 1500 B MSDU：
 
-<p align="center"><img alt="N_MSDU_approx_7" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20N_%7B%5Cmathrm%7BMSDU%7D%7D%5Capprox%5Cleft%5Clfloor%5Cfrac%7B11398%7D%7B1500%7D%5Cright%5Crfloor%3D7" /></p>
+$$
+N_{\mathrm{MSDU}}
+\approx
+\left\lfloor\frac{11398}{1500}\right\rfloor
+=7.
+$$
 
 因此，每个 MPDU 内通过 A-MSDU 承载的有效负载可近似为：
 
-<p align="center"><img alt="payload per mpdu" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20L_%7B%5Cmathrm%7Bpayload%2Cper%20MPDU%7D%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%5Capprox7%5Ctimes1500%3D10500%5C%20%5Cmathrm%7BB%7D%3D84000%5C%20%5Cmathrm%7Bbit%7D" /></p>
+$$
+L_{\mathrm{payload,per\ MPDU}}^{\mathrm{agg}}
+\approx
+7\times1500
+=10500\ \mathrm{B}
+=84000\ \mathrm{bit}.
+$$
 
 推荐理论推导中取：
 
 | 参数 | 推荐取值 | 说明 |
 |---|---:|---|
-| <img alt="L_MSDU" src="https://latex.codecogs.com/svg.image?L_%7B%5Cmathrm%7BMSDU%7D%7D" /> | `1500 B` | 与代码一致 |
-| <img alt="N_MSDU" src="https://latex.codecogs.com/svg.image?N_%7B%5Cmathrm%7BMSDU%7D%7D" /> | `1 ~ 7`，常用近似 `7` | 由 A-MSDU 上限决定 |
-| <img alt="N_MPDU_j" src="https://latex.codecogs.com/svg.image?N_%7B%5Cmathrm%7BMPDU%7D%2Cj%7D" /> | 保留为变量 | 由队列、MCS、PPDU 时长、Block ACK 和调度过程决定 |
-| <img alt="T_AIFS" src="https://latex.codecogs.com/svg.image?T_%7B%5Cmathrm%7BAIFS%7D%7D" /> | `43 μs` | BE 业务常用近似 |
-| <img alt="sigma" src="https://latex.codecogs.com/svg.image?%5Csigma" /> | `9 μs` | 5 GHz OFDM 类 Wi-Fi 常用时隙 |
-| <img alt="CWmin" src="https://latex.codecogs.com/svg.image?CW_%7B%5Cmin%7D" /> | `15` | BE 常用最小竞争窗口 |
-| <img alt="Ebo" src="https://latex.codecogs.com/svg.image?E%5BT_%7B%5Cmathrm%7Bbo%7D%7D%5D" /> | `67.5 μs` | 由 `15/2 × 9 μs` 得到 |
-| <img alt="T_SIFS" src="https://latex.codecogs.com/svg.image?T_%7B%5Cmathrm%7BSIFS%7D%7D" /> | `16 μs` | 常用近似 |
-| <img alt="T_BA" src="https://latex.codecogs.com/svg.image?T_%7B%5Cmathrm%7BBA%7D%7D" /> | `30 ~ 60 μs` | 理论近似，ns-3 中实际自动计算 |
+| $L_{\mathrm{MSDU}}$ | `1500 B` | 与代码一致 |
+| $N_{\mathrm{MSDU}}$ | `1 ~ 7`，常用近似 `7` | 由 A-MSDU 上限决定 |
+| $N_{\mathrm{MPDU},j}$ | 保留为变量 | 由队列、MCS、PPDU 时长、Block ACK 和调度过程决定 |
+| $T_{\mathrm{AIFS}}$ | `43 μs` | BE 业务常用近似 |
+| $\sigma$ | `9 μs` | 5 GHz OFDM 类 Wi-Fi 常用时隙 |
+| $CW_{\min}$ | `15` | BE 常用最小竞争窗口 |
+| $E[T_{\mathrm{bo}}]$ | `67.5 μs` | 由 `15/2 × 9 μs` 得到 |
+| $T_{\mathrm{SIFS}}$ | `16 μs` | 常用近似 |
+| $T_{\mathrm{BA}}$ | `30 ~ 60 μs` | 理论近似，ns-3 中实际自动计算 |
 
 需要注意：`15523200 B` 是 A-MPDU 聚合上限，不应直接当作每次实际发送长度。理论中更稳妥的写法是：
 
-<p align="center"><img alt="Lpayload typical" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20L_%7B%5Cmathrm%7Bpayload%7D%2Cj%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%5Capprox%2010500N_%7B%5Cmathrm%7BMPDU%7D%2Cj%7D%5C%20%5Cmathrm%7BB%7D" /></p>
+$$
+L_{\mathrm{payload},j}^{\mathrm{agg}}
+\approx
+10500N_{\mathrm{MPDU},j}\ \mathrm{B},
+$$
 
-并保留 <img alt="N_MPDU_j" src="https://latex.codecogs.com/svg.image?N_%7B%5Cmathrm%7BMPDU%7D%2Cj%7D" /> 作为变量。
+并保留 $N_{\mathrm{MPDU},j}$ 作为变量。
 
 ---
 
@@ -196,9 +260,11 @@ AIFS / DIFS
 
 本节只考虑最简单情景：一个 ONT、一个 AP、一个 STA、无外部干扰。候选接入点只有：
 
-<p align="center"><img alt="j in ONT AP only" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20j%5Cin%5C%7B%5Cmathrm%7BONT%7D%2C%5Cmathrm%7BAP%7D%5C%7D" /></p>
+$$
+j\in\{\mathrm{ONT},\mathrm{AP}\}.
+$$
 
-聚合吞吐公式中的 <img alt="R_j" src="https://latex.codecogs.com/svg.image?R_j%28d_j%29" /> 表示 STA 与候选接入点之间的 PHY rate。由于当前代码是下行 TCP，因此更直观地看，是 ONT/AP 到 STA 的无线 PHY rate；从路径损耗角度看，它仍由 STA 与 ONT/AP 的距离决定。
+聚合吞吐公式中的 $R_j(d_j)$ 表示 STA 与候选接入点之间的 PHY rate。由于当前代码是下行 TCP，因此更直观地看，是 ONT/AP 到 STA 的无线 PHY rate；从路径损耗角度看，它仍由 STA 与 ONT/AP 的距离决定。
 
 ### 6.1 距离计算
 
@@ -212,53 +278,114 @@ AIFS / DIFS
 
 两个候选无线链路距离分别为：
 
-<p align="center"><img alt="d sta ont" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20d_%7B%5Cmathrm%7BSTA-ONT%7D%7D%3D%5Csqrt%7Bx_%7B%5Cmathrm%7BSTA%7D%7D%5E2%2By_%7B%5Cmathrm%7BSTA%7D%7D%5E2%7D" /></p>
+$$
+d_{\mathrm{STA-ONT}}
+=
+\sqrt{x_{\mathrm{STA}}^2+y_{\mathrm{STA}}^2},
+$$
 
-<p align="center"><img alt="d sta ap" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20d_%7B%5Cmathrm%7BSTA-AP%7D%7D%3D%5Csqrt%7B%28x_%7B%5Cmathrm%7BSTA%7D%7D-10%29%5E2%2By_%7B%5Cmathrm%7BSTA%7D%7D%5E2%7D" /></p>
+$$
+d_{\mathrm{STA-AP}}
+=
+\sqrt{(x_{\mathrm{STA}}-10)^2+y_{\mathrm{STA}}^2}.
+$$
+
+实际计算路径损耗时，建议使用有效距离
+
+$$
+d_{\mathrm{eff}}=\max(d,d_0),\qquad d_0=1\ \mathrm{m},
+$$
+
+避免 $d=0$ 或近场距离导致 $\log_{10}(d)$ 无定义或路径损耗不合理。
 
 ### 6.2 距离到 PHY rate 的链条
 
 无外部干扰时，距离通过路径损耗、接收功率和 SNR 间接影响 PHY rate：
 
-<p align="center"><img alt="rate chain" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20d_%7B%5Cmathrm%7BSTA-%7Dj%7D%5Crightarrow%20PL_j%28d_%7B%5Cmathrm%7BSTA-%7Dj%7D%29%5Crightarrow%20P_%7Br%2Cj%7D%28d_%7B%5Cmathrm%7BSTA-%7Dj%7D%29%5Crightarrow%20SNR_j%28d_%7B%5Cmathrm%7BSTA-%7Dj%7D%29%5Crightarrow%20MCS_j%5Crightarrow%20R_j" /></p>
+$$
+d_{\mathrm{STA}-j}
+\rightarrow
+PL_j(d_{\mathrm{STA}-j})
+\rightarrow
+P_{r,j}(d_{\mathrm{STA}-j})
+\rightarrow
+SNR_j(d_{\mathrm{STA}-j})
+\rightarrow
+MCS_j
+\rightarrow
+R_j.
+$$
 
 路径损耗模型可写为：
 
-<p align="center"><img alt="path loss" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20PL_j%28d_%7B%5Cmathrm%7BSTA-%7Dj%7D%29%3DPL_0%2B10%5Calpha%5Clog_%7B10%7D%5Cleft%28%5Cfrac%7Bd_%7B%5Cmathrm%7BSTA-%7Dj%7D%7D%7Bd_0%7D%5Cright%29" /></p>
+$$
+PL_j(d_{\mathrm{STA}-j})
+=
+PL_0+10\alpha\log_{10}\left(\frac{d_{\mathrm{STA}-j}}{d_0}\right).
+$$
 
-其中 <img alt="d0" src="https://latex.codecogs.com/svg.image?d_0" /> 是参考距离，通常可取 `1 m`；<img alt="PL0" src="https://latex.codecogs.com/svg.image?PL_0" /> 是参考距离处的路径损耗；<img alt="alpha" src="https://latex.codecogs.com/svg.image?%5Calpha" /> 是路径损耗指数。当前代码没有单独手动设置这些值，而是由 ns-3 的 `LogDistancePropagationLossModel` 默认参数处理。
+其中 $d_0$ 是参考距离，通常可取 `1 m`；$PL_0$ 是参考距离处的路径损耗；$\alpha$ 是路径损耗指数。
 
 接收功率为：
 
-<p align="center"><img alt="received power" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20P_%7Br%2Cj%7D%28d_%7B%5Cmathrm%7BSTA-%7Dj%7D%29%3DP_t%2BG_t%2BG_%7Br%2Cj%7D-PL_j%28d_%7B%5Cmathrm%7BSTA-%7Dj%7D%29" /></p>
+$$
+P_{r,j}(d_{\mathrm{STA}-j})
+=
+P_t+G_t+G_{r,j}-PL_j(d_{\mathrm{STA}-j}).
+$$
 
 无外部干扰时，信噪比为：
 
-<p align="center"><img alt="snr" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20SNR_j%28d_%7B%5Cmathrm%7BSTA-%7Dj%7D%29%3DP_%7Br%2Cj%7D%28d_%7B%5Cmathrm%7BSTA-%7Dj%7D%29-N_j" /></p>
+$$
+SNR_j(d_{\mathrm{STA}-j})
+=
+P_{r,j}(d_{\mathrm{STA}-j})-N_j.
+$$
 
 噪声功率可近似写成：
 
-<p align="center"><img alt="noise" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20N_j%3D-174%2B10%5Clog_%7B10%7D%28B_j%29%2BNF_j%5Cquad%5Cmathrm%7B%28dBm%29%7D" /></p>
+$$
+N_j=-174+10\log_{10}(B_j)+NF_j\qquad \mathrm{(dBm)}.
+$$
 
-其中 `-174 dBm/Hz` 是室温下的热噪声功率谱密度，<img alt="B_j" src="https://latex.codecogs.com/svg.image?B_j" /> 需要以 Hz 为单位。当前 <img alt="B_j=160MHz" src="https://latex.codecogs.com/svg.image?B_j%3D160%5C%20%5Cmathrm%7BMHz%7D" /> 且暂不考虑接收机噪声系数时：
+其中 `-174 dBm/Hz` 是室温下的热噪声功率谱密度，$B_j$ 需要以 Hz 为单位。若 $B_j=160\ \mathrm{MHz}$ 且采用 $NF_j=7\ \mathrm{dB}$，则：
 
-<p align="center"><img alt="noise 160" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20N_j%5Capprox-174%2B10%5Clog_%7B10%7D%28160%5Ctimes10%5E6%29%5Capprox-92%5C%20%5Cmathrm%7BdBm%7D" /></p>
+$$
+N_j
+\approx
+-174+10\log_{10}(160\times10^6)+7
+\approx
+-84.96\ \mathrm{dBm}.
+$$
 
 MCS 可用 SNR 门限建模：
 
-<p align="center"><img alt="mcs" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20MCS_j%28d_%7B%5Cmathrm%7BSTA-%7Dj%7D%29%3D%5Cmax%5Cleft%5C%7Bm%3ASNR_j%28d_%7B%5Cmathrm%7BSTA-%7Dj%7D%29%5Cge%5CGamma_m%5Cright%5C%7D" /></p>
+$$
+MCS_j(d_{\mathrm{STA}-j})
+=
+\max\left\{m:SNR_j(d_{\mathrm{STA}-j})\ge\Gamma_m\right\}.
+$$
 
 最后得到：
 
-<p align="center"><img alt="rate" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20R_j%28d_%7B%5Cmathrm%7BSTA-%7Dj%7D%29%3DR_%7BMCS_j%28d_%7B%5Cmathrm%7BSTA-%7Dj%7D%29%7D%5Cleft%28B_j%2CNSS_j%2CGI_j%5Cright%29" /></p>
+$$
+R_j(d_{\mathrm{STA}-j})
+=
+R_{MCS_j(d_{\mathrm{STA}-j})}(B_j,NSS_j,GI_j).
+$$
 
 在当前代码配置下，带宽、空间流和 GI 固定，因此：
 
-<p align="center"><img alt="rate current" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20R_j%28d_%7B%5Cmathrm%7BSTA-%7Dj%7D%29%3DR_%7BMCS_j%28SNR_j%28d_%7B%5Cmathrm%7BSTA-%7Dj%7D%29%29%7D%5Cleft%28160%5C%20%5Cmathrm%7BMHz%7D%2C2%2C800%5C%20%5Cmathrm%7Bns%7D%5Cright%29" /></p>
+$$
+R_j(d_{\mathrm{STA}-j})
+=
+R_{MCS_j(SNR_j(d_{\mathrm{STA}-j}))}
+(160\ \mathrm{MHz},2,800\ \mathrm{ns}).
+$$
 
 ### 6.3 频段为什么没有直接出现在 PHY rate 表达式中
 
-表达式 <img alt="R_MCS" src="https://latex.codecogs.com/svg.image?R_%7BMCS%7D%28B%2CNSS%2CGI%29" /> 描述的是在给定 MCS、带宽、空间流数和保护间隔后的标称 PHY rate。2.4 GHz、5 GHz、6 GHz 的差异主要通过路径损耗进入，即通过 <img alt="PL_df" src="https://latex.codecogs.com/svg.image?PL%28d%2Cf%29" /> 影响接收功率、SNR 和 MCS。当前仿真固定为 5 GHz，因此模型中暂不把频率作为变量；若后续比较 2.4/5/6 GHz，需要将 <img alt="Rj" src="https://latex.codecogs.com/svg.image?R_j%28d_j%29" /> 扩展为 <img alt="Rjf" src="https://latex.codecogs.com/svg.image?R_j%28d_j%2Cf_j%29" />。
+表达式 $R_{MCS}(B,NSS,GI)$ 描述的是在给定 MCS、带宽、空间流数和保护间隔后的标称 PHY rate。2.4 GHz、5 GHz、6 GHz 的差异主要通过路径损耗进入，即通过 $PL(d,f)$ 影响接收功率、SNR 和 MCS。当前仿真固定为 5 GHz，因此模型中暂不把频率作为变量；若后续比较 2.4/5/6 GHz，需要将 $R_j(d_j)$ 扩展为 $R_j(d_j,f_j)$。
 
 ---
 
@@ -268,37 +395,74 @@ MCS 可用 SNR 门限建模：
 
 若 STA 直接接入 ONT，下行路径为 ONT 到 STA：
 
-<p align="center"><img alt="path ont" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20S_%7B%5Cmathrm%7Bpath%2CONT%7D%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%3DS_%7B%5Cmathrm%7BONT%5Cto%20STA%7D%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%28d_%7B%5Cmathrm%7BSTA-ONT%7D%7D%29" /></p>
+$$
+S_{\mathrm{path,ONT}}^{\mathrm{agg}}
+=
+S_{\mathrm{ONT}\to\mathrm{STA}}^{\mathrm{agg}}
+(d_{\mathrm{STA-ONT}}).
+$$
 
 若 STA 接入 AP，下行路径为 ONT 先经有线链路到 AP，再由 AP 通过 Wi-Fi 发给 STA：
 
-<p align="center"><img alt="path ap" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20S_%7B%5Cmathrm%7Bpath%2CAP%7D%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%3D%5Cmin%5Cleft%28C_%7B%5Cmathrm%7Beth%7D%2CS_%7B%5Cmathrm%7BAP%5Cto%20STA%7D%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%28d_%7B%5Cmathrm%7BSTA-AP%7D%7D%29%5Cright%29" /></p>
+$$
+S_{\mathrm{path,AP}}^{\mathrm{agg}}
+=
+\min\left(
+C_{\mathrm{eth}},
+S_{\mathrm{AP}\to\mathrm{STA}}^{\mathrm{agg}}
+(d_{\mathrm{STA-AP}})
+\right).
+$$
 
 由于当前有线回传容量为 `10 Gbps`，通常远大于单条 Wi-Fi 链路吞吐，因此在最小场景中常可近似为：
 
-<p align="center"><img alt="path ap approx" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20S_%7B%5Cmathrm%7Bpath%2CAP%7D%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%5Capprox%20S_%7B%5Cmathrm%7BAP%5Cto%20STA%7D%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%28d_%7B%5Cmathrm%7BSTA-AP%7D%7D%29" /></p>
+$$
+S_{\mathrm{path,AP}}^{\mathrm{agg}}
+\approx
+S_{\mathrm{AP}\to\mathrm{STA}}^{\mathrm{agg}}
+(d_{\mathrm{STA-AP}}).
+$$
 
 最终接入选择为：
 
-<p align="center"><img alt="select" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20j%5E%5Cstar%3D%5Carg%5Cmax_%7Bj%5Cin%5C%7B%5Cmathrm%7BONT%7D%2C%5Cmathrm%7BAP%7D%5C%7D%7D%20S_%7B%5Cmathrm%7Bpath%2Cj%7D%7D%5E%7B%5Cmathrm%7Bagg%7D%7D" /></p>
+$$
+j^*
+=
+\arg\max_{j\in\{\mathrm{ONT},\mathrm{AP}\}}
+S_{\mathrm{path},j}^{\mathrm{agg}}.
+$$
 
 ### 7.2 应用层供给限制
 
 实际测得吞吐还受到应用层提供流量的限制，因此可以写成：
 
-<p align="center"><img alt="measured throughput" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20S_%7B%5Cmathrm%7Bmeas%2Cj%7D%7D%3D%5Cmin%5Cleft%28S_%7B%5Cmathrm%7Bpath%2Cj%7D%7D%2C%5CLambda_%7B%5Cmathrm%7Bapp%7D%7D%5Cright%29" /></p>
+$$
+S_{\mathrm{meas},j}
+=
+\min\left(S_{\mathrm{path},j},\Lambda_{\mathrm{app}}\right).
+$$
 
 批量脚本实际使用 `1` 条 TCP 流、单流应用速率 `20 Gbps`，因此：
 
-<p align="center"><img alt="lambda app" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20%5CLambda_%7B%5Cmathrm%7Bapp%7D%7D%3D1%5Ctimes20%5C%20%5Cmathrm%7BGbps%7D%3D20%5C%20%5Cmathrm%7BGbps%7D" /></p>
+$$
+\Lambda_{\mathrm{app}}
+=1\times20\ \mathrm{Gbps}
+=20\ \mathrm{Gbps}.
+$$
 
 通常有：
 
-<p align="center"><img alt="lambda large" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20%5CLambda_%7B%5Cmathrm%7Bapp%7D%7D%5Cgg%20S_%7B%5Cmathrm%7Bpath%2Cj%7D%7D" /></p>
+$$
+\Lambda_{\mathrm{app}}\gg S_{\mathrm{path},j}.
+$$
 
 因此当前最小场景可以近似看作饱和发送：
 
-<p align="center"><img alt="meas approx" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20S_%7B%5Cmathrm%7Bmeas%2Cj%7D%7D%5Capprox%20S_%7B%5Cmathrm%7Bpath%2Cj%7D%7D" /></p>
+$$
+S_{\mathrm{meas},j}
+\approx
+S_{\mathrm{path},j}.
+$$
 
 ---
 
@@ -310,13 +474,27 @@ MCS 可用 SNR 门限建模：
 
 无线传播时延可写为：
 
-<p align="center"><img alt="tau wifi" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20%5Ctau_%7B%5Cmathrm%7Bwifi%7D%2Cj%7D%3D%5Cfrac%7Bd_%7B%5Cmathrm%7BSTA-%7Dj%7D%7D%7Bc%7D" /></p>
+$$
+\tau_{\mathrm{wifi},j}
+=
+\frac{d_{\mathrm{STA}-j}}{c},
+$$
 
-其中 <img alt="c" src="https://latex.codecogs.com/svg.image?c" /> 为电磁波传播速度，近似取 <img alt="c value" src="https://latex.codecogs.com/svg.image?3%5Ctimes10%5E8%5C%20%5Cmathrm%7Bm%2Fs%7D" />。
+其中 $c$ 为电磁波传播速度，近似取 $3\times10^8\ \mathrm{m/s}$。
 
 严格写法可以在无线成功聚合传输时间中加入 DATA 和 Block ACK 的往返传播时延：
 
-<p align="center"><img alt="Tsucc delay" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20T_%7B%5Cmathrm%7Bsucc%7D%2Cj%7D%5E%7B%5Cmathrm%7Bagg%2Cdelay%7D%7D%3DT_%7B%5Cmathrm%7BAIFS%7D%7D%2BE%5BT_%7B%5Cmathrm%7Bbo%7D%7D%5D%2BT_%7B%5Cmathrm%7BPHY%7D%2Cj%7D%2B%5Cfrac%7BL_%7B%5Cmathrm%7BPSDU%7D%2Cj%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%7D%7BR_j%28d_j%29%7D%2BT_%7B%5Cmathrm%7BSIFS%7D%7D%2BT_%7B%5Cmathrm%7BBA%7D%7D%2B2%5Ctau_%7B%5Cmathrm%7Bwifi%7D%2Cj%7D" /></p>
+$$
+T_{\mathrm{succ},j}^{\mathrm{agg,delay}}
+=
+T_{\mathrm{AIFS}}
++E[T_{\mathrm{bo}}]
++T_{\mathrm{PHY},j}
++\frac{L_{\mathrm{PSDU},j}^{\mathrm{agg}}}{R_j(d_j)}
++T_{\mathrm{SIFS}}
++T_{\mathrm{BA}}
++2\tau_{\mathrm{wifi},j}.
+$$
 
 当前米级 Wi-Fi 场景中，例如距离为 `10 m` 时，单程无线传播时延约为 `33 ns`，往返约 `66 ns`，远小于 AIFS、随机退避、SIFS 等微秒级开销。因此在单跳吞吐主公式中可以忽略；但在级联跳数较多时，多个有线 / 无线传播时延会累积，需要在端到端时延模型中保留。
 
@@ -330,31 +508,64 @@ ONT → AP → STA
 
 除了 AP 到 STA 的无线服务时间，还存在 ONT 到 AP 的有线传输与传播时延。可以写成：
 
-<p align="center"><img alt="D AP path" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20D_%7B%5Cmathrm%7Bpath%2CAP%7D%7D%3D%5Cfrac%7BL_%7B%5Cmathrm%7Bpayload%7D%7D%7D%7BC_%7B%5Cmathrm%7Beth%7D%7D%2B%5Ctau_%7B%5Cmathrm%7Beth%7D%7D%2BT_%7B%5Cmathrm%7Bsucc%2CAP%7D%7D%5E%7B%5Cmathrm%7Bagg%2Cdelay%7D%7D" /></p>
+$$
+D_{\mathrm{path,AP}}
+=
+\frac{L_{\mathrm{payload}}}{C_{\mathrm{eth}}}
++\tau_{\mathrm{eth}}
++T_{\mathrm{succ,AP}}^{\mathrm{agg,delay}}.
+$$
 
 其中当前代码典型值为：
 
-<p align="center"><img alt="eth values" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20C_%7B%5Cmathrm%7Beth%7D%7D%3D10%5C%20%5Cmathrm%7BGbps%7D%2C%5Cqquad%20%5Ctau_%7B%5Cmathrm%7Beth%7D%7D%3D500%5C%20%5Cmathrm%7Bns%7D" /></p>
+$$
+C_{\mathrm{eth}}=10\ \mathrm{Gbps},\qquad
+\tau_{\mathrm{eth}}=500\ \mathrm{ns}.
+$$
 
 如果采用保守的“端到端服务时间”模型，则 AP 路径的时延增强吞吐可写成：
 
-<p align="center"><img alt="S AP delay" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20S_%7B%5Cmathrm%7Bpath%2CAP%7D%7D%5E%7B%5Cmathrm%7Bdelay%7D%7D%3D%5Cfrac%7BL_%7B%5Cmathrm%7Bpayload%7D%7D%7D%7BD_%7B%5Cmathrm%7Bpath%2CAP%7D%7D%7D" /></p>
+$$
+S_{\mathrm{path,AP}}^{\mathrm{delay}}
+=
+\frac{L_{\mathrm{payload}}}{D_{\mathrm{path,AP}}}.
+$$
 
 不过需要注意：对于连续 TCP 流，网络通常存在流水线传输，稳态吞吐更接近瓶颈链路容量；固定传播时延主要影响端到端 delay 和 TCP RTT，而不一定直接按上述端到端服务时间线性降低稳态吞吐。
 
 ### 8.3 级联场景的一般写法
 
-若后续考虑多级 AP 级联，路径中可能包含多个无线跳和多个有线跳。设路径中有 <img alt="H" src="https://latex.codecogs.com/svg.image?H" /> 个无线跳、<img alt="K" src="https://latex.codecogs.com/svg.image?K" /> 个有线跳，则端到端时延可以写成：
+若后续考虑多级 AP 级联，路径中可能包含多个无线跳和多个有线跳。设路径中有 $H$ 个无线跳、$K$ 个有线跳，则端到端时延可以写成：
 
-<p align="center"><img alt="D cascade" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20D_%7B%5Cmathrm%7BE2E%7D%7D%3D%5Csum_%7Bh%3D1%7D%5EH%20T_%7B%5Cmathrm%7Bsucc%7D%2Ch%7D%5E%7B%5Cmathrm%7Bagg%2Cdelay%7D%7D%2B%5Csum_%7Bk%3D1%7D%5EK%5Cleft%28%5Cfrac%7BL_%7B%5Cmathrm%7Bpayload%7D%7D%7D%7BC_%7B%5Cmathrm%7Beth%2Ck%7D%7D%2B%5Ctau_%7B%5Cmathrm%7Beth%2Ck%7D%7D%5Cright%29" /></p>
+$$
+D_{\mathrm{E2E}}
+=
+\sum_{h=1}^{H}T_{\mathrm{succ},h}^{\mathrm{agg,delay}}
++
+\sum_{k=1}^{K}\left(
+\frac{L_{\mathrm{payload}}}{C_{\mathrm{eth},k}}
++\tau_{\mathrm{eth},k}
+\right).
+$$
 
 对应的保守服务时间吞吐为：
 
-<p align="center"><img alt="S cascade service" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20S_%7B%5Cmathrm%7BE2E%7D%7D%5E%7B%5Cmathrm%7Bservice%7D%7D%3D%5Cfrac%7BL_%7B%5Cmathrm%7Bpayload%7D%7D%7D%7BD_%7B%5Cmathrm%7BE2E%7D%7D%7D" /></p>
+$$
+S_{\mathrm{E2E}}^{\mathrm{service}}
+=
+\frac{L_{\mathrm{payload}}}{D_{\mathrm{E2E}}}.
+$$
 
 如果采用稳态流水线视角，则端到端吞吐更接近路径中各跳容量的最小值：
 
-<p align="center"><img alt="S cascade bottleneck" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20S_%7B%5Cmathrm%7BE2E%7D%7D%5E%7B%5Cmathrm%7Bbottleneck%7D%7D%3D%5Cmin%5Cleft%28%5Cmin_%7Bh%7D%20S_%7B%5Cmathrm%7Bwireless%7D%2Ch%7D%5E%7B%5Cmathrm%7Bagg%7D%7D%2C%5Cmin_%7Bk%7D%20C_%7B%5Cmathrm%7Beth%2Ck%7D%7D%5Cright%29" /></p>
+$$
+S_{\mathrm{E2E}}^{\mathrm{bottleneck}}
+=
+\min\left(
+\min_h S_{\mathrm{wireless},h}^{\mathrm{agg}},
+\min_k C_{\mathrm{eth},k}
+\right).
+$$
 
 两种写法的区别是：
 
@@ -365,7 +576,11 @@ ONT → AP → STA
 
 在 TCP 场景中，级联时延还会增大 RTT。若 TCP 发送/接收窗口有限，吞吐还可能受到窗口限制：
 
-<p align="center"><img alt="tcp window limit" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20S_%7B%5Cmathrm%7BTCP%7D%7D%5Cle%5Cfrac%7BW_%7B%5Cmathrm%7BTCP%7D%7D%7D%7BRTT%7D" /></p>
+$$
+S_{\mathrm{TCP}}
+\le
+\frac{W_{\mathrm{TCP}}}{RTT}.
+$$
 
 因此，后续做级联分析时，建议同时保留：
 
@@ -391,13 +606,20 @@ C++ 默认可以关闭 OBSS，但 Python 扫描脚本的默认参数会开启 OB
 
 当前本文档讨论的是最小理论场景，因此无外部干扰，采用：
 
-<p align="center"><img alt="snr no interference" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20SNR_j%3DP_%7Br%2Cj%7D-N_j" /></p>
+$$
+SNR_j=P_{r,j}-N_j.
+$$
 
 如果后续考虑 OBSS 干扰，应改成：
 
-<p align="center"><img alt="sinr" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20SINR_j%3DP_%7Br%2Cj%7D-%2810%5Clog_%7B10%7D%2810%5E%7BN_j%2F10%7D%2B10%5E%7BI_j%2F10%7D%29%29" /></p>
+$$
+SINR_j
+=
+P_{r,j}
+-10\log_{10}\left(10^{N_j/10}+10^{I_j/10}\right).
+$$
 
-其中 <img alt="I_j" src="https://latex.codecogs.com/svg.image?I_j" /> 表示干扰功率。最小场景下可取 <img alt="I zero" src="https://latex.codecogs.com/svg.image?I_j%3D0" />。
+其中 $I_j$ 表示干扰功率。最小场景下可取 $I_j=0$。注意不能直接写成 `Pr - N - I`，因为噪声和干扰都是功率，必须先在线性域相加。
 
 ---
 
@@ -405,7 +627,11 @@ C++ 默认可以关闭 OBSS，但 Python 扫描脚本的默认参数会开启 OB
 
 如果令：
 
-<p align="center"><img alt="single special" src="https://latex.codecogs.com/svg.image?%5Cdisplaystyle%20N_%7B%5Cmathrm%7BMPDU%7D%2Cj%7D%3D1%2C%5Cquad%20N_%7B%5Cmathrm%7BMSDU%7D%2Cj%7D%3D1%2C%5Cquad%20T_%7B%5Cmathrm%7BBA%7D%7D%5Crightarrow%20T_%7B%5Cmathrm%7BACK%7D%7D" /></p>
+$$
+N_{\mathrm{MPDU},j}=1,\qquad
+N_{\mathrm{MSDU},j}=1,\qquad
+T_{\mathrm{BA}}\rightarrow T_{\mathrm{ACK}},
+$$
 
 则聚合模型退化为单帧模型。两者结构都是：
 
