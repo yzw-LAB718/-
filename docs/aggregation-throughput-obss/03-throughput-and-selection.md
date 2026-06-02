@@ -4,7 +4,7 @@
 
 ---
 
-## 1. 固定聚合长度
+## 1. 固定聚合参数
 
 当前简化理论模型中直接取：
 
@@ -18,50 +18,31 @@ L_{\mathrm{MSDU}}&=1500\ \mathrm{B}.
 \end{aligned}
 $$
 
-因此一次聚合中的有效负载长度为：
+一次聚合中的有效负载长度记为：
 
 $$
 \begin{aligned}
 L_{\mathrm{payload},j}^{\mathrm{agg}}
-&=64\times7\times1500
-\\
-&=672000\ \mathrm{B}
-\\
-&=5376000\ \mathrm{bit}.
+&=N_{\mathrm{MPDU},j}N_{\mathrm{MSDU},j}L_{\mathrm{MSDU}}.
 \end{aligned}
 $$
 
-聚合后 PSDU 总长度取：
+聚合后空口上传输的 PSDU 总长度记为：
 
 $$
-\begin{aligned}
-L_{\mathrm{PSDU},j}^{\mathrm{agg}}
-&=681472\ \mathrm{B}
-\\
-&=5451776\ \mathrm{bit}.
-\end{aligned}
+L_{\mathrm{PSDU},j}^{\mathrm{agg}}.
 $$
 
-聚合开销为：
+聚合开销记为：
 
 $$
 \begin{aligned}
 L_{\mathrm{oh},j}^{\mathrm{agg}}
-&=681472-672000
-\\
-&=9472\ \mathrm{B}
-\\
-&=75776\ \mathrm{bit}.
+&=L_{\mathrm{PSDU},j}^{\mathrm{agg}}-L_{\mathrm{payload},j}^{\mathrm{agg}}.
 \end{aligned}
 $$
 
-在后续吞吐公式中，直接使用：
-
-$$
-L_{\mathrm{payload},j}^{\mathrm{agg}}=5376000\ \mathrm{bit},
-\qquad
-L_{\mathrm{PSDU},j}^{\mathrm{agg}}=5451776\ \mathrm{bit}.
-$$
+后续吞吐公式中只使用 $L_{\mathrm{payload},j}^{\mathrm{agg}}$ 和 $L_{\mathrm{PSDU},j}^{\mathrm{agg}}$ 两个符号，不再把长度数值直接写入主公式。
 
 ---
 
@@ -78,18 +59,16 @@ T_{\mathrm{succ},j}^{\mathrm{agg}}
 \end{aligned}
 $$
 
-由于这里 $L_{\mathrm{PSDU},j}^{\mathrm{agg}}$ 已经使用 bit，因此不再额外乘 8。
-
-无 OBSS 聚合吞吐为：
+这里 $L_{\mathrm{PSDU},j}^{\mathrm{agg}}$ 使用 bit 表示，因此不再额外乘 8。无 OBSS 聚合吞吐为：
 
 $$
 \begin{aligned}
 S_j^{\mathrm{agg}}
 &=\frac{L_{\mathrm{payload},j}^{\mathrm{agg}}}{T_{\mathrm{succ},j}^{\mathrm{agg}}}
 \\
-&=\frac{5376000}
+&=\frac{L_{\mathrm{payload},j}^{\mathrm{agg}}}
 {T_{\mathrm{AIFS}}+E[T_{\mathrm{bo}}]+T_{\mathrm{PHY},j}
-+\dfrac{5451776}{R_j}
++\dfrac{L_{\mathrm{PSDU},j}^{\mathrm{agg}}}{R_j}
 +T_{\mathrm{SIFS}}+T_{\mathrm{BA}}}.
 \end{aligned}
 $$
@@ -140,16 +119,16 @@ S_j^{\mathrm{agg,OBSS}}
 (1-\rho_{\mathrm{OBSS}})S_j^{\mathrm{agg}}(SINR_j).
 $$
 
-代入固定聚合长度后：
+写成展开形式为：
 
 $$
 \begin{aligned}
 S_j^{\mathrm{agg,OBSS}}
 &\approx
 (1-\rho_{\mathrm{OBSS}})
-\frac{5376000}
+\frac{L_{\mathrm{payload},j}^{\mathrm{agg}}}
 {T_{\mathrm{AIFS}}+E[T_{\mathrm{bo}}]+T_{\mathrm{PHY},j}
-+\dfrac{5451776}{R_j(SINR_j)}
++\dfrac{L_{\mathrm{PSDU},j}^{\mathrm{agg}}}{R_j(SINR_j)}
 +T_{\mathrm{SIFS}}+T_{\mathrm{BA}}}.
 \end{aligned}
 $$
@@ -183,11 +162,11 @@ $$
 $$
 \begin{aligned}
 S_j^{\mathrm{agg,OBSS}}
-&=\frac{5376000}{T_{\mathrm{succ},j}^{\mathrm{agg,OBSS}}}
+&=\frac{L_{\mathrm{payload},j}^{\mathrm{agg}}}{T_{\mathrm{succ},j}^{\mathrm{agg,OBSS}}}
 \\
 &\approx
 (1-\rho_{\mathrm{OBSS}})
-\frac{5376000}{T_{\mathrm{succ},j}^{\mathrm{agg}}(SINR_j)}.
+\frac{L_{\mathrm{payload},j}^{\mathrm{agg}}}{T_{\mathrm{succ},j}^{\mathrm{agg}}(SINR_j)}.
 \end{aligned}
 $$
 
@@ -203,9 +182,9 @@ $$
 \begin{aligned}
 S_j^{\mathrm{agg,OBSS}}
 &\approx
-\frac{5376000}
+\frac{L_{\mathrm{payload},j}^{\mathrm{agg}}}
 {T_{\mathrm{AIFS}}+E[T_{\mathrm{bo}}]_{\mathrm{OBSS}}+T_{\mathrm{PHY},j}
-+\dfrac{5451776}{R_j(SINR_j)}
++\dfrac{L_{\mathrm{PSDU},j}^{\mathrm{agg}}}{R_j(SINR_j)}
 +T_{\mathrm{SIFS}}+T_{\mathrm{BA}}}.
 \end{aligned}
 $$
@@ -345,9 +324,9 @@ $$
 S_j^{\mathrm{agg,OBSS}}
 &\approx
 (1-\rho_{\mathrm{OBSS}})
-\frac{5376000}
+\frac{L_{\mathrm{payload},j}^{\mathrm{agg}}}
 {T_{\mathrm{AIFS}}+E[T_{\mathrm{bo}}]+T_{\mathrm{PHY},j}
-+\dfrac{5451776}{R_j(SINR_j)}
++\dfrac{L_{\mathrm{PSDU},j}^{\mathrm{agg}}}{R_j(SINR_j)}
 +T_{\mathrm{SIFS}}+T_{\mathrm{BA}}}.
 \end{aligned}
 $$
