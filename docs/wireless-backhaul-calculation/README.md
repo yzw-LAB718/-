@@ -125,16 +125,10 @@ $$
 T_{\mathrm{SIFS}}=16\ \mu s.
 $$
 
-仓库目前尚未固定 $T_{\mathrm{BA}}$ 的精确数值，理论推导时可先保留为变量；若需要一阶估算，可临时取：
+当前理论计算中固定取：
 
 $$
-T_{\mathrm{BA}}\approx40\ \mu s,
-$$
-
-或做区间分析：
-
-$$
-T_{\mathrm{BA}}\in[30,60]\ \mu s.
+T_{\mathrm{BA}}=45\ \mu s.
 $$
 
 定义单跳固定开销：
@@ -149,13 +143,13 @@ T_{\mathrm{AIFS}}
 +T_{\mathrm{BA}}.
 $$
 
-若取 $T_{\mathrm{BA}}=40\ \mu s$，则：
+代入上述取值：
 
 $$
 \begin{aligned}
 T_{\mathrm{fixed}}
-&=43+67.5+52+16+40 \\
-&=218.5\ \mu s.
+&=43+67.5+52+16+45 \\
+&=223.5\ \mu s.
 \end{aligned}
 $$
 
@@ -658,13 +652,13 @@ $$
 如果取：
 
 $$
-T_{\mathrm{fixed}}\approx218.5\ \mu s,
+T_{\mathrm{fixed}}\approx223.5\ \mu s,
 $$
 
 则 AP 双跳路径固定开销为：
 
 $$
-2T_{\mathrm{fixed}}\approx437\ \mu s.
+2T_{\mathrm{fixed}}\approx447\ \mu s.
 $$
 
 因此无线回传下，AP 路径比有线回传多承担一整跳无线服务时间。
