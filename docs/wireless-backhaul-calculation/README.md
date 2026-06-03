@@ -2,7 +2,7 @@
 
 本文档专门总结 **ONT–AP 为无线回传** 时，当前 Wi-Fi Mesh 理论吞吐模型的计算流程、关键假设和推荐公式。
 
-> 公式渲染说明：本文档所有多行公式均使用 `aligned` 写法，避免 GitHub Markdown 把单独的 `=` 或 `\approx` 误判为标题分隔线，导致 LaTeX 渲染失败。
+> 公式渲染说明：为兼容 GitHub Markdown / KaTeX，本文档避免使用 `\left`、`\right` 和单独成行的 `=`，多行公式统一使用 `aligned` 写法。
 
 ---
 
@@ -19,7 +19,7 @@ STA 可以选择接入 ONT 或 AP
 无多 STA 竞争
 ```
 
-因此，下行路径有两种：
+下行路径有两种：
 
 ```text
 STA 接入 ONT：ONT → STA
@@ -34,7 +34,7 @@ ONT → AP ：无线回传链路
 AP  → STA：无线接入链路
 ```
 
-在该场景中，**STA 接入 ONT** 是单跳无线；**STA 接入 AP** 是双跳无线，即一跳无线回传加一跳无线接入。
+因此，**STA 接入 ONT** 是单跳无线；**STA 接入 AP** 是双跳无线，即一跳无线回传加一跳无线接入。
 
 ---
 
@@ -49,7 +49,7 @@ S_{\mathrm{path,AP,wired}}^{\mathrm{agg}}
 \end{aligned}
 $$
 
-但当 ONT–AP 变成无线回传后，STA 接入 AP 的路径为：
+无线回传时，STA 接入 AP 的路径为：
 
 ```text
 ONT → AP → STA
@@ -71,8 +71,6 @@ T_{\mathrm{path,AP,wireless}}^{\mathrm{agg}}
 +T_{\mathrm{AP}\to\mathrm{STA}}^{\mathrm{agg}}.
 \end{aligned}
 $$
-
-这就是无线回传和有线回传的核心区别。
 
 ---
 
@@ -295,8 +293,6 @@ S_{\mathrm{path,ONT}}^{\mathrm{agg}}
 \end{aligned}
 $$
 
-其中 $L_{\mathrm{payload}}^{\mathrm{agg}}$ 和 $L_{\mathrm{PSDU}}^{\mathrm{agg}}$ 均使用 bit 表示。
-
 ---
 
 ## 8. STA 接入 AP：双跳无线路径
@@ -392,8 +388,6 @@ S_{\mathrm{path,AP,wireless}}^{\mathrm{agg}}
 \end{aligned}
 $$
 
-这说明同信道双跳无线回传即使每一跳链路都很好，端到端吞吐也常常会接近单跳的一半。
-
 ---
 
 ## 10. 与双信道 / 双 radio 情况的区别
@@ -426,7 +420,7 @@ $$
 $$
 \begin{aligned}
 S_{\mathrm{meas},j}
-&=\min\left(S_{\mathrm{path},j}^{\mathrm{agg}},\Lambda_{\mathrm{app}}\right).
+&=\min(S_{\mathrm{path},j}^{\mathrm{agg}},\Lambda_{\mathrm{app}}).
 \end{aligned}
 $$
 
@@ -442,7 +436,7 @@ $$
 
 $$
 \begin{aligned}
-\Lambda_{\mathrm{app}}&\gg S_{\mathrm{path},j}^{\mathrm{agg}},
+\Lambda_{\mathrm{app}}&\gg S_{\mathrm{path},j}^{\mathrm{agg}}.
 \end{aligned}
 $$
 
@@ -468,16 +462,20 @@ S_{\mathrm{path,AP,wireless}}^{\mathrm{agg}}.
 \end{aligned}
 $$
 
-即：
+令：
 
 $$
 \begin{aligned}
-j^*
-&=\arg\max
-\left\{
-S_{\mathrm{path,ONT}}^{\mathrm{agg}},
-S_{\mathrm{path,AP,wireless}}^{\mathrm{agg}}
-\right\}.
+S_{\mathrm{ONT}}^{\mathrm{candidate}}&=S_{\mathrm{path,ONT}}^{\mathrm{agg}},\\
+S_{\mathrm{AP}}^{\mathrm{candidate}}&=S_{\mathrm{path,AP,wireless}}^{\mathrm{agg}}.
+\end{aligned}
+$$
+
+则接入选择可以写为：
+
+$$
+\begin{aligned}
+j^*&=\operatorname*{arg\,max}_{q\in\{\mathrm{ONT},\mathrm{AP}\}} S_q^{\mathrm{candidate}}.
 \end{aligned}
 $$
 
