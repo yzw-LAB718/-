@@ -2,7 +2,7 @@
 
 本文档专门总结 **ONT–AP 为无线回传** 时，当前 Wi-Fi Mesh 理论吞吐模型的计算流程、关键假设和推荐公式。
 
-> 公式渲染说明：为兼容 GitHub Markdown / KaTeX，本文档避免使用 `\left`、`\right` 和单独成行的 `=`，多行公式统一使用 `aligned` 写法。
+> 公式渲染说明：为兼容 GitHub Markdown / KaTeX，本文档避免使用 `\left`、`\right`、`\operatorname` 和单独成行的 `=`，多行公式统一使用 `aligned` 写法。
 
 ---
 
@@ -475,7 +475,7 @@ $$
 
 $$
 \begin{aligned}
-j^*&=\operatorname*{arg\,max}_{q\in\{\mathrm{ONT},\mathrm{AP}\}} S_q^{\mathrm{candidate}}.
+j^*&=\arg\max_{q\in\{\mathrm{ONT},\mathrm{AP}\}} S_q^{\mathrm{candidate}}.
 \end{aligned}
 $$
 
